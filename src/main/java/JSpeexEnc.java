@@ -67,8 +67,10 @@
 
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.*;
+import pl.pw.radeja.HideF0Encoder;
 
 import java.io.*;
+import java.util.Arrays;
 
 /**
  * Java Speex Command Line Encoder.
@@ -531,6 +533,7 @@ public class JSpeexEnc {
             }
         } catch (EOFException e) {
         }
+        HideF0Encoder.hide(speexEncoder.getBitsCollector());
         writer.close();
         dis.close();
     }

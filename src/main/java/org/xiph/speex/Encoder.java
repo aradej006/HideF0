@@ -68,6 +68,7 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
 
 /**
  * Speex Encoder interface, used as a base for the Narrowband and sideband
@@ -84,7 +85,7 @@ public interface Encoder {
      * @param in   - the raw mono audio frame to encode.
      * @return 1 if successful.
      */
-    public int encode(Bits bits, float[] in);
+    public int encode(BitsCollector bitsCollector, Bits bits, float[] in);
 
     /**
      * Returns the size in bits of an audio frame encoded with the current mode.

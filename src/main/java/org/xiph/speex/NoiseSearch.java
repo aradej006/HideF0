@@ -69,6 +69,7 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
 
 /**
  * Noise codebook search
@@ -96,7 +97,7 @@ public class NoiseSearch
      */
     public final void quant(float[] target, float[] ak, float[] awk1, float[] awk2,
                             int p, int nsf, float[] exc, int es, float[] r,
-                            Bits bits, int complexity) {
+                            Bits bits, BitsCollector bitsCollector, int complexity) {
         int i;
         @NotNull float[] tmp = new float[nsf];
         Filters.residue_percep_zero(target, 0, ak, awk1, awk2, tmp, nsf, p);

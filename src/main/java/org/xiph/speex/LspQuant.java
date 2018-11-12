@@ -69,6 +69,7 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
 
 /**
  * Abstract class that is the base for the various LSP Quantisation and
@@ -100,7 +101,8 @@ public abstract class LspQuant
     public abstract void quant(final float[] lsp,
                                final float[] qlsp,
                                final int order,
-                               final Bits bits);
+                               final Bits bits,
+                               final BitsCollector bitsCollector);
 
     /**
      * Line Spectral Pair Unquantification.

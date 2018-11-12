@@ -68,6 +68,8 @@
 
 package org.xiph.speex;
 
+import pl.pw.radeja.BitsCollector;
+
 /**
  * Abstract class that is the base for the various LTP (Long Term Prediction)
  * Quantisation and Unquantisation methods.
@@ -84,7 +86,7 @@ public abstract class Ltp {
      */
     public abstract int quant(float[] target, float[] sw, int sws, float[] ak, float[] awk1, float[] awk2,
                               float[] exc, int es, int start, int end, float pitch_coef, int p,
-                              int nsf, Bits bits, float[] exc2, int e2s, float[] r, int complexity);
+                              int nsf, Bits bits, BitsCollector bitsCollector, float[] exc2, int e2s, float[] r, int complexity);
 
     /**
      * Long Term Prediction Unquantification.
@@ -152,8 +154,8 @@ public abstract class Ltp {
                                                 final float[] gain,
                                                 final int N) {
         int i, j, k;
-    /*float corr=0;*/
-    /*float energy;*/
+        /*float corr=0;*/
+        /*float energy;*/
         float[] best_score;
         float e0;
         float[] corr, energy, score;
@@ -170,7 +172,7 @@ public abstract class Ltp {
         energy[0] = inner_prod(sw, swIdx - start, sw, swIdx - start, len);
         e0 = inner_prod(sw, swIdx, sw, swIdx, len);
         for (i = start; i <= end; i++) {
-      /* Update energy for next pitch*/
+            /* Update energy for next pitch*/
             energy[i - start + 1] = energy[i - start] +
                     sw[swIdx - i - 1] * sw[swIdx - i - 1] -
                     sw[swIdx - i + len - 1] * sw[swIdx - i + len - 1];
@@ -183,7 +185,7 @@ public abstract class Ltp {
         }
 
         for (i = start; i <= end; i++) {
-      /* Compute correlation*/
+            /* Compute correlation*/
             corr[i - start] = inner_prod(sw, swIdx, sw, swIdx - i, len);
             score[i - start] = corr[i - start] * corr[i - start] / (energy[i - start] + 1);
         }

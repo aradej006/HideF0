@@ -68,6 +68,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.NamesOfBits;
 import pl.pw.radeja.PitchCollector;
 
 import java.util.Arrays;
@@ -87,6 +89,7 @@ public class SpeexEncoder {
 
     private Encoder encoder;
     private final Bits bits;
+    private final BitsCollector bitsCollector;
     private float[] rawData;
     private int sampleRate;
     private int channels;
@@ -97,6 +100,7 @@ public class SpeexEncoder {
      */
     public SpeexEncoder() {
         bits = new Bits();
+        bitsCollector = new BitsCollector();
     }
 
     /**
@@ -190,6 +194,7 @@ public class SpeexEncoder {
      */
     public int getProcessedData(@NotNull final byte[] data, final int offset) {
         int size = bits.getBufferSize();
+        bitsCollector.addSize(size);
         System.arraycopy(bits.getBuffer(), 0, data, offset, size);
         bits.init();
         return size;
@@ -260,7 +265,7 @@ public class SpeexEncoder {
         if (channels == 2) {
             Stereo.encode(bits, data, frameSize);
         }
-        encoder.encode(bits, data);
+        encoder.encode(bitsCollector, bits, data);
         PitchCollector.addPitch(((NbEncoder) encoder).getPitches());
         return true;
     }
@@ -295,5 +300,9 @@ public class SpeexEncoder {
         for (int i = 0; i < length; i++) {
             samples[offsetOutput + i] = (float) ((pcm16bitBytes[offsetInput + 2 * i] & 0xff) | (pcm16bitBytes[offsetInput + 2 * i + 1] << 8)); // no & 0xff at the end to keep the sign
         }
+    }
+
+    public BitsCollector getBitsCollector() {
+        return bitsCollector;
     }
 }

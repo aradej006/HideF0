@@ -69,6 +69,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.NamesOfBits;
 
 /**
  * LSP Quantisation and Unquantisation (Lbr)
@@ -90,7 +92,8 @@ public class LbrLspQuant
     public final void quant(final float[] lsp,
                             final float[] qlsp,
                             final int order,
-                            @NotNull final Bits bits) {
+                            @NotNull final Bits bits,
+                            @NotNull final BitsCollector bitsCollector) {
         int i;
         float tmp1, tmp2;
         int id;
@@ -113,13 +116,16 @@ public class LbrLspQuant
 
         id = lsp_quant(qlsp, 0, cdbk_nb, NB_CDBK_SIZE, order);
         bits.pack(id, 6);
+        bitsCollector.addBits(NamesOfBits.LBR_LSP_QUANT, id, 6);
 
         for (i = 0; i < order; i++)
             qlsp[i] *= 2;
         id = lsp_weight_quant(qlsp, 0, quant_weight, 0, cdbk_nb_low1, NB_CDBK_SIZE_LOW1, 5);
         bits.pack(id, 6);
+        bitsCollector.addBits(NamesOfBits.LBR_LSP_QUANT, id, 6);
         id = lsp_weight_quant(qlsp, 5, quant_weight, 5, cdbk_nb_high1, NB_CDBK_SIZE_HIGH1, 5);
         bits.pack(id, 6);
+        bitsCollector.addBits(NamesOfBits.LBR_LSP_QUANT, id, 6);
 
         for (i = 0; i < order; i++)
             qlsp[i] *= 0.0019531f;

@@ -68,6 +68,8 @@
 
 package org.xiph.speex;
 
+import pl.pw.radeja.BitsCollector;
+
 /**
  * Abstract class that is the base for the various Codebook search methods.
  *
@@ -93,7 +95,7 @@ public abstract class CbSearch {
      */
     public abstract void quant(float[] target, float[] ak, float[] awk1, float[] awk2,
                                int p, int nsf, float[] exc, int es, float[] r,
-                               Bits bits, int complexity);
+                               Bits bits, BitsCollector bitsCollector, int complexity);
 
     /**
      * Codebook Search Unquantification.

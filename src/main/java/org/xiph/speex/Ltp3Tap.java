@@ -69,6 +69,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.NamesOfBits;
 import pl.pw.radeja.PitchCollector;
 
 /**
@@ -115,7 +117,7 @@ public class Ltp3Tap
      */
     public final int quant(float[] target, float[] sw, int sws, float[] ak, float[] awk1, float[] awk2,
                            float[] exc, int es, int start, int end, float pitch_coef, int p,
-                           int nsf, @NotNull Bits bits, float[] exc2, int e2s, float[] r, int complexity) {
+                           int nsf, @NotNull Bits bits, @NotNull BitsCollector bitsCollector, float[] exc2, int e2s, float[] r, int complexity) {
         int i, j;
         @NotNull int[] cdbk_index = new int[1];
         int pitch = 0;
@@ -137,7 +139,9 @@ public class Ltp3Tap
 
         if (N == 0 || end < start) {
             bits.pack(0, pitch_bits);
+            bitsCollector.addBits(NamesOfBits.PITCH, 0, pitch_bits);
             bits.pack(0, gain_bits);
+            bitsCollector.addBits(NamesOfBits.PITCH_BEST_GAIN, 0, gain_bits);
             for (i = 0; i < nsf; i++)
                 exc[es + i] = 0;
             return start;
@@ -163,11 +167,13 @@ public class Ltp3Tap
                 best_gain_index = cdbk_index[0];
             }
         }
-        int pitchValue = best_pitch - start + 5;
-//        int pitchValue = 127;
+        int pitchValue = best_pitch - start;
+
         PitchCollector.addPitch(pitchValue);
         bits.pack(pitchValue, pitch_bits);
+        bitsCollector.addBits(NamesOfBits.PITCH, pitchValue, pitch_bits);
         bits.pack(best_gain_index, gain_bits);
+        bitsCollector.addBits(NamesOfBits.PITCH_BEST_GAIN, best_gain_index, gain_bits);
         for (i = 0; i < nsf; i++)
             exc[es + i] = best_exc[i];
 

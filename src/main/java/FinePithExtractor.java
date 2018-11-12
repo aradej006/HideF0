@@ -1,6 +1,7 @@
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.PitchCollector;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -8,13 +9,15 @@ import java.util.stream.Collectors;
 public class FinePithExtractor {
 
     public static void main(@NotNull final String[] args) throws IOException {
-        final String path = "D:/PracaMgr/jspeex/TIMIT_M/1";
+        final String path = "D:/PracaMgr/master-thesis/TIMIT_M/1";
         @NotNull JSpeexEnc encoder = getSpeexEncoder(path);
         System.out.println("Encoding....");
         encoder.encode();
         System.out.println("Encoded");
         Collection<Integer> pitches = PitchCollector.getAllSinglePitches();
         System.out.println(pitches.stream().map(Object::toString).collect(Collectors.joining(";")));
+//        FileInputStream pitchIn = new FileInputStream(path + "-pitch.spx");
+//        FileInputStream hideIn = new FileInputStream(path + "-hide.spx");
 //        @NotNull JSpeexDec decoder = getSpeexDecoder(path);
 //        System.out.println("Decoding....");
 //        decoder.decode();

@@ -69,6 +69,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
+import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.NamesOfBits;
 
 /**
  * Split shape codebook search
@@ -152,7 +154,7 @@ public class SplitShapeSearch
      */
     public final void quant(float[] target, float[] ak, float[] awk1, float[] awk2,
                             int p, int nsf, float[] exc, int es, float[] r,
-                            @NotNull Bits bits, int complexity) {
+                            @NotNull Bits bits, @NotNull BitsCollector bitsCollector, int complexity) {
         int i, j, k, m, n, q;
         float[] resp;
         float[] ndist, odist;
@@ -181,7 +183,7 @@ public class SplitShapeSearch
 
 //    System.arraycopy(target, 0, t, 0, nsf);
 
-    /* Pre-compute codewords response and energy */
+        /* Pre-compute codewords response and energy */
         for (i = 0; i < shape_cb_size; i++) {
             int res;
             int shape;
@@ -189,14 +191,14 @@ public class SplitShapeSearch
             res = i * subvect_size;
             shape = i * subvect_size;
 
-      /* Compute codeword response using convolution with impulse response */
+            /* Compute codeword response using convolution with impulse response */
             for (j = 0; j < subvect_size; j++) {
                 resp[res + j] = 0;
                 for (k = 0; k <= j; k++)
                     resp[res + j] += 0.03125f * shape_cb[shape + k] * r[j - k];
             }
 
-      /* Compute codeword energy */
+            /* Compute codeword energy */
             E[i] = 0;
             for (j = 0; j < subvect_size; j++)
                 E[i] += resp[res + j] * resp[res + j];
@@ -204,33 +206,33 @@ public class SplitShapeSearch
 
         for (j = 0; j < N; j++)
             odist[j] = 0;
-    /*For all subvectors*/
+        /*For all subvectors*/
         for (i = 0; i < nb_subvect; i++) {
             int offset = i * subvect_size;
-      /*"erase" nbest list*/
+            /*"erase" nbest list*/
             for (j = 0; j < N; j++)
                 ndist[j] = -1;
 
-      /*For all n-bests of previous subvector*/
+            /*For all n-bests of previous subvector*/
             for (j = 0; j < N; j++) {
-        /*Find new n-best based on previous n-best j*/
+                /*Find new n-best based on previous n-best j*/
                 if (have_sign != 0)
                     VQ.nbest_sign(ot[j], offset, resp, subvect_size, shape_cb_size, E, N, best_index, best_dist);
                 else
                     VQ.nbest(ot[j], offset, resp, subvect_size, shape_cb_size, E, N, best_index, best_dist);
 
-        /*For all new n-bests*/
+                /*For all new n-bests*/
                 for (k = 0; k < N; k++) {
                     float[] ct;
                     float err = 0;
                     ct = ot[j];
-          /*update target*/
+                    /*update target*/
 
-          /*previous target*/
+                    /*previous target*/
                     for (m = offset; m < offset + subvect_size; m++)
                         t[m] = ct[m];
 
-          /* New code: update only enough of the target to calculate error*/
+                    /* New code: update only enough of the target to calculate error*/
                     {
                         int rind;
                         int res;
@@ -249,17 +251,17 @@ public class SplitShapeSearch
                                 t[offset + m] += resp[res + m];
                     }
 
-          /*compute error (distance)*/
+                    /*compute error (distance)*/
                     err = odist[j];
                     for (m = offset; m < offset + subvect_size; m++)
                         err += t[m] * t[m];
-          /*update n-best list*/
+                    /*update n-best list*/
                     if (err < ndist[N - 1] || ndist[N - 1] < -0.5f) {
 
-            /*previous target (we don't care what happened before*/
+                        /*previous target (we don't care what happened before*/
                         for (m = offset + subvect_size; m < nsf; m++)
                             t[m] = ct[m];
-            /* New code: update the rest of the target only if it's worth it */
+                        /* New code: update the rest of the target only if it's worth it */
                         for (m = 0; m < subvect_size; m++) {
                             float g;
                             int rind;
@@ -300,8 +302,8 @@ public class SplitShapeSearch
                     break;
             }
 
-      /*update old-new data*/
-      /* just swap pointers instead of a long copy */
+            /*update old-new data*/
+            /* just swap pointers instead of a long copy */
             {
                 float[][] tmp2;
                 tmp2 = ot;
@@ -315,13 +317,14 @@ public class SplitShapeSearch
                 odist[j] = ndist[j];
         }
 
-    /*save indices*/
+        /*save indices*/
         for (i = 0; i < nb_subvect; i++) {
             ind[i] = nind[0][i];
             bits.pack(ind[i], shape_bits + have_sign);
+            bitsCollector.addBits(NamesOfBits.CODE_BOOK, ind[i], shape_bits + have_sign);
         }
 
-    /* Put everything back together */
+        /* Put everything back together */
         for (i = 0; i < nb_subvect; i++) {
             int rind;
             float sign = 1;
@@ -334,11 +337,11 @@ public class SplitShapeSearch
             for (j = 0; j < subvect_size; j++)
                 e[subvect_size * i + j] = sign * 0.03125f * shape_cb[rind * subvect_size + j];
         }
-    /* Update excitation */
+        /* Update excitation */
         for (j = 0; j < nsf; j++)
             exc[es + j] += e[j];
 
-    /* Update target */
+        /* Update target */
         Filters.syn_percep_zero(e, 0, ak, awk1, awk2, r2, nsf, p);
         for (j = 0; j < nsf; j++)
             target[j] -= r2[j];
@@ -355,7 +358,7 @@ public class SplitShapeSearch
     public final void unquant(float[] exc, int es, int nsf, @NotNull Bits bits) {
         int i, j;
 
-    /* Decode codewords and gains */
+        /* Decode codewords and gains */
         for (i = 0; i < nb_subvect; i++) {
             if (have_sign != 0)
                 signs[i] = bits.unpack(1);
@@ -364,7 +367,7 @@ public class SplitShapeSearch
             ind[i] = bits.unpack(shape_bits);
         }
 
-    /* Compute decoded excitation */
+        /* Compute decoded excitation */
         for (i = 0; i < nb_subvect; i++) {
             float s = 1.0f;
             if (signs[i] != 0)

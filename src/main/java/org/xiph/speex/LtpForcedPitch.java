@@ -68,6 +68,8 @@
 
 package org.xiph.speex;
 
+import pl.pw.radeja.BitsCollector;
+
 /**
  * Long Term Prediction Quantisation and Unquantisation (Forced Pitch)
  *
@@ -84,7 +86,7 @@ public class LtpForcedPitch
      */
     public final int quant(float[] target, float[] sw, int sws, float[] ak, float[] awk1, float[] awk2,
                            float[] exc, int es, int start, int end, float pitch_coef, int p,
-                           int nsf, Bits bits, float[] exc2, int e2s, float[] r, int complexity) {
+                           int nsf, Bits bits, BitsCollector bitsCollector, float[] exc2, int e2s, float[] r, int complexity) {
         int i;
         if (pitch_coef > .99f)
             pitch_coef = .99f;
