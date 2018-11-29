@@ -1,9 +1,13 @@
 package pl.pw.radeja;
 
+import org.javatuples.Pair;
 import org.javatuples.Triplet;
+import org.javatuples.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.Bits;
+import pl.pw.radeja.pitch.FirstLastLinearApproximate;
+import pl.pw.radeja.pitch.IPitchChanger;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +22,7 @@ public final class HideF0Encoder {
 
     public static void hide(BitsCollector bitsCollector) throws IOException {
         numberOfHiddenPositions = 0;
-        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(PATH + "-hide.spx"));
+        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(PATH + "-hide-" + FirstLastLinearApproximate.threshold + ".spx"));
         Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> chunks = getChunks(bitsCollector);
         for (int i = 1; i <= chunks.size(); i++) {
             saveChunk(writer, chunks.get(i));
@@ -58,20 +62,25 @@ public final class HideF0Encoder {
     }
 
     private static List<Triplet<NamesOfBits, Integer, Integer>> changePitchValues(List<Triplet<NamesOfBits, Integer, Integer>> bits) {
-        Map<Integer, Triplet<NamesOfBits, Integer, Integer>> pitch = new HashMap<>();
+        List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> pitch = new ArrayList<>();
         for (int i = 0; i < bits.size(); i++) {
             if (bits.get(i).getValue0().equals(NamesOfBits.PITCH)) {
-                pitch.put(i, bits.get(i));
+                pitch.add(new Pair<>(i, bits.get(i)));
             }
         }
-        List<Integer> pitchValues = pitch.entrySet().stream().map(e -> e.getValue().getValue1()).collect(Collectors.toList());
-        //todo: change pitch with thr
-        int threshold = 10, maxVariance = 5;
-        if (Collections.max(pitchValues) - Collections.min(pitchValues) < threshold) {
-            printPitchValue("A", bits);
-            numberOfHiddenPositions += 3;
-            pitch.forEach((key, value) -> bits.set(key, value.setAt1(value.getValue1() + (RAND.nextInt((1 + 2 * maxVariance)) - maxVariance))));
-            printPitchValue("B", bits);
+        // change: IPitchChanger
+        IPitchChanger pitchChanger = new FirstLastLinearApproximate();
+        List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getValue1()).collect(Collectors.toList());
+        List<Integer> newPitches = pitchChanger.change(pitchValues);
+
+        if (pitchChanger.shouldChange(pitchValues)) {
+//        printPitchValue("A", bits);
+            numberOfHiddenPositions += 2;
+            for (int i = 0; i < pitch.size(); i++) {
+                Pair<Integer, Triplet<NamesOfBits, Integer, Integer>> pair = pitch.get(i);
+                bits.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
+            }
+//        printPitchValue("B", bits);
         }
         return bits;
     }
