@@ -68,6 +68,8 @@
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.*;
 import pl.pw.radeja.HideF0Encoder;
+import pl.pw.radeja.pitch.FirstLastLinearApproximate;
+import pl.pw.radeja.pitch.NonPitchChanger;
 
 import java.io.*;
 import java.util.Arrays;
@@ -186,10 +188,13 @@ public class JSpeexEnc {
      */
     protected String destFile;
 
+    private HideF0Encoder hideF0Encoder;
+
     /**
      * Builds a plain JSpeex Encoder with default values.
      */
-    public JSpeexEnc() {
+    public JSpeexEnc(HideF0Encoder hideF0Encoder) {
+        this.hideF0Encoder = hideF0Encoder;
     }
 
     /**
@@ -203,10 +208,16 @@ public class JSpeexEnc {
      */
     public static void main(@NotNull final String[] args)
             throws IOException {
-        @NotNull JSpeexEnc encoder = new JSpeexEnc();
+
+        HideF0Encoder hideF0Encoder = new HideF0Encoder(new NonPitchChanger(), "dump");
+        @NotNull JSpeexEnc encoder = new JSpeexEnc(hideF0Encoder);
         if (encoder.parseArgs(args)) {
             encoder.encode();
         }
+    }
+
+    public HideF0Encoder getHideF0Encoder() {
+        return hideF0Encoder;
     }
 
     /**
@@ -533,7 +544,7 @@ public class JSpeexEnc {
             }
         } catch (EOFException e) {
         }
-        HideF0Encoder.hide(speexEncoder.getBitsCollector());
+        hideF0Encoder.hide(speexEncoder.getBitsCollector());
         writer.close();
         dis.close();
     }

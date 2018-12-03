@@ -39,6 +39,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.WaveToolbox;
+import pl.pw.radeja.HideF0Encoder;
+import pl.pw.radeja.pitch.NonPitchChanger;
 
 import java.io.File;
 import java.io.IOException;
@@ -400,7 +402,7 @@ public class TestJSpeexCodec
                                             final int sampleRate,
                                             final int channels,
                                             final boolean vbr) {
-        @NotNull JSpeexEnc enc = new JSpeexEnc();
+        @NotNull JSpeexEnc enc = new JSpeexEnc(new HideF0Encoder(new NonPitchChanger(), "dump"));
         enc.srcFile = filename + ".wav";
         enc.destFile = filename + ".spx";
         enc.srcFormat = JSpeexEnc.FILE_FORMAT_WAVE;

@@ -2,12 +2,10 @@ package pl.pw.radeja;
 
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
-import org.javatuples.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.Bits;
-import pl.pw.radeja.pitch.FirstLastLinearApproximate;
-import pl.pw.radeja.pitch.IPitchChanger;
+import pl.pw.radeja.pitch.PitchChanger;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,14 +13,18 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class HideF0Encoder {
-    private static final int logLevel = 1;
-    private static final String PATH = "D:/PracaMgr/master-thesis/TIMIT_M/1";
-    private static final Random RAND = new Random();
-    private static Integer numberOfHiddenPositions = 0;
+    private final int logLevel = 1;
+    private String path;
+    private Integer numberOfHiddenPositions = 0;
+    private PitchChanger pitchChanger;
 
-    public static void hide(BitsCollector bitsCollector) throws IOException {
-        numberOfHiddenPositions = 0;
-        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(PATH + "-hide-" + FirstLastLinearApproximate.threshold + ".spx"));
+    public HideF0Encoder(PitchChanger pitchChanger, String path) {
+        this.pitchChanger = pitchChanger;
+        this.path = path;
+    }
+
+    public void hide(BitsCollector bitsCollector) throws IOException {
+        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "-hide-" + pitchChanger.getThreshold() + ".spx"));
         Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> chunks = getChunks(bitsCollector);
         for (int i = 1; i <= chunks.size(); i++) {
             saveChunk(writer, chunks.get(i));
@@ -31,10 +33,9 @@ public final class HideF0Encoder {
             System.out.println("Number of hidden positions: " + numberOfHiddenPositions);
         }
         writer.close();
-        numberOfHiddenPositions = 0;
     }
 
-    private static Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> getChunks(BitsCollector bitsCollector) {
+    private Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> getChunks(BitsCollector bitsCollector) {
         Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> chunks = new HashMap<>();
         List<Triplet<NamesOfBits, Integer, Integer>> chunk = new ArrayList<>();
         for (int i = 0; i < bitsCollector.getBitsToSave().size(); i++) {
@@ -48,7 +49,7 @@ public final class HideF0Encoder {
         return chunks;
     }
 
-    private static void saveChunk(AudioFileWriter writer, List<Triplet<NamesOfBits, Integer, Integer>> bitsToSave) throws IOException {
+    private void saveChunk(AudioFileWriter writer, List<Triplet<NamesOfBits, Integer, Integer>> bitsToSave) throws IOException {
         @NotNull byte[] temp = new byte[2560];
         List<Triplet<NamesOfBits, Integer, Integer>> changed = changePitchValues(bitsToSave);
         Bits bits = new Bits();
@@ -61,15 +62,14 @@ public final class HideF0Encoder {
         }
     }
 
-    private static List<Triplet<NamesOfBits, Integer, Integer>> changePitchValues(List<Triplet<NamesOfBits, Integer, Integer>> bits) {
+    private List<Triplet<NamesOfBits, Integer, Integer>> changePitchValues(List<Triplet<NamesOfBits, Integer, Integer>> bits) {
         List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> pitch = new ArrayList<>();
         for (int i = 0; i < bits.size(); i++) {
             if (bits.get(i).getValue0().equals(NamesOfBits.PITCH)) {
                 pitch.add(new Pair<>(i, bits.get(i)));
             }
         }
-        // change: IPitchChanger
-        IPitchChanger pitchChanger = new FirstLastLinearApproximate();
+        // change: PitchChanger
         List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getValue1()).collect(Collectors.toList());
         List<Integer> newPitches = pitchChanger.change(pitchValues);
 
@@ -85,7 +85,7 @@ public final class HideF0Encoder {
         return bits;
     }
 
-    private static void printPitchValue(String prefix, List<Triplet<NamesOfBits, Integer, Integer>> bits) {
+    private void printPitchValue(String prefix, List<Triplet<NamesOfBits, Integer, Integer>> bits) {
         if (logLevel >= 1) {
             System.out.println(prefix + ": " +
                     bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH))
@@ -96,5 +96,9 @@ public final class HideF0Encoder {
             );
         }
 
+    }
+
+    public Integer getNumberOfHiddenPositions() {
+        return numberOfHiddenPositions;
     }
 }

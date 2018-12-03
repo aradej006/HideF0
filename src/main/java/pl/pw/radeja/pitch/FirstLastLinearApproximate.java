@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class FirstLastLinearApproximate implements IPitchChanger {
+public class FirstLastLinearApproximate extends PitchChanger {
 
-    public static Integer threshold = 128;
+    public FirstLastLinearApproximate(Integer threshold) {
+        super(threshold);
+    }
 
     @Override
     public List<Integer> change(List<Integer> pitches) {
