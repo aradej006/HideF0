@@ -1,10 +1,18 @@
+import org.javatuples.Pair;
+import org.javatuples.Triplet;
+import org.javatuples.Tuple;
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.HideF0Encoder;
 import pl.pw.radeja.PitchCollector;
+import pl.pw.radeja.pesq.PesqResultPrinter;
+import pl.pw.radeja.pesq.PesqRunner;
+import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pitch.FirstLastLinearApproximate;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,23 +21,11 @@ import java.util.stream.Collectors;
 
 public class FinePithExtractor {
 
-    public static void main(@NotNull final String[] args) throws IOException {
-        List<String> paths = getSamples();
-        List<Integer> thresholds = getThresholds();
-        List<String> results = new ArrayList<>();
-        paths.forEach(path -> thresholds.forEach(threshold -> {
-            @NotNull JSpeexEnc encoder = getSpeexEncoder(path, threshold);
-            try {
-                encoder.encode();
-                HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
-                results.add(path + '\t' + threshold + '\t' + hideF0Encoder.getNumberOfHiddenPositions());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
-        System.out.println("Path\tThreshold\tAllowPlaces");
-        results.forEach(System.out::println);
-//        final String path = "D:/PracaMgr/master-thesis/TIMIT_M/1";
+    public static void main(@NotNull final String[] args) throws IOException, InterruptedException {
+//        calclateAllowPlaces();
+
+
+        final String path = "D:/PracaMgr/master-thesis/TIMIT_M/1";
 //        final Integer threshold = 5;
 //        @NotNull JSpeexEnc encoder = getSpeexEncoder(path, threshold);
 //        System.out.println("Encoding....");
@@ -39,10 +35,20 @@ public class FinePithExtractor {
 //        System.out.println(pitches.stream().map(Object::toString).collect(Collectors.joining(";")));
 //        FileInputStream pitchIn = new FileInputStream(path + "-pitch.spx");
 //        FileInputStream hideIn = new FileInputStream(path + "-hide.spx");
-//        @NotNull JSpeexDec decoder = getSpeexDecoder(path);
+//        @NotNull JSpeexDec decoder = getSpeexDecoder(path + "-hide-1");
 //        System.out.println("Decoding....");
 //        decoder.decode();
 //        System.out.println("Decoded");
+
+        // decoding
+//        List<String> filesToDecode = new ArrayList<>();
+//        getSamples().forEach(s -> getThresholds().forEach(t -> filesToDecode.add(s + "-hide-" + t)));
+//        runDecoding(filesToDecode);
+
+        //pesq
+//        List<PesqFiles> filesToPesq = new ArrayList<>();
+//        getSamples().forEach(s -> getThresholds().forEach(t -> filesToPesq.add(new PesqFiles(s + "-hide-0-dec.wav", s + "-hide-" + t + "-dec.wav"))));
+//        PesqResultPrinter.print(PesqRunner.run(filesToPesq));
     }
 
     private static JSpeexEnc getSpeexEncoder(final String filename, final Integer threshold) {
@@ -63,7 +69,7 @@ public class FinePithExtractor {
     private static JSpeexDec getSpeexDecoder(final String filename) {
         @NotNull JSpeexDec dec = new JSpeexDec();
         dec.srcFile = filename + ".spx";
-        dec.destFile = filename + "-encdec.wav";
+        dec.destFile = filename + "-dec.wav";
         dec.srcFormat = JSpeexDec.FILE_FORMAT_OGG;
         dec.destFormat = JSpeexDec.FILE_FORMAT_WAVE;
         dec.printlevel = JSpeexDec.DEBUG;
@@ -89,4 +95,32 @@ public class FinePithExtractor {
     private static List<Integer> getThresholds() {
         return Arrays.asList(0, 1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 128);
     }
+
+    private static void calclateAllowPlaces() {
+        List<String> paths = getSamples();
+        List<Integer> thresholds = getThresholds();
+        List<String> results = new ArrayList<>();
+        paths.forEach(path -> thresholds.forEach(threshold -> {
+            @NotNull JSpeexEnc encoder = getSpeexEncoder(path, threshold);
+            try {
+                encoder.encode();
+                HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
+                results.add(path + '\t' + threshold + '\t' + hideF0Encoder.getNumberOfHiddenPositions());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+        System.out.println("Path\tThreshold\tAllowPlaces");
+        results.forEach(System.out::println);
+    }
+
+    private static void runDecoding(List<String> paths) throws IOException {
+        System.out.println("Decoding....");
+        for (String p : paths) {
+            @NotNull JSpeexDec decoder = getSpeexDecoder(p);
+            decoder.decode();
+        }
+        System.out.println("Decoded");
+    }
+
 }
