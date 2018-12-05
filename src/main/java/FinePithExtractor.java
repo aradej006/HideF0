@@ -23,18 +23,6 @@ public class FinePithExtractor {
         // calculate allow places
         List<AllowPlaces> allowPlacesResult = calculateAllowPlaces(getSamples(), getThresholds());
         AllowPlacesPrint.print(allowPlacesResult);
-//        final Integer threshold = 5;
-//        @NotNull JSpeexEnc encoder = getSpeexEncoder(path, threshold);
-//        System.out.println("Encoding....");
-//        encoder.encode();
-//        System.out.println("Encoded");
-//        System.out.println(pitches.stream().map(Object::toString).collect(Collectors.joining(";")));
-//        FileInputStream pitchIn = new FileInputStream(path + "-pitch.spx");
-//        FileInputStream hideIn = new FileInputStream(path + "-hide.spx");
-//        @NotNull JSpeexDec decoder = getSpeexDecoder(path + "-hide-1");
-//        System.out.println("Decoding....");
-//        decoder.decode();
-//        System.out.println("Decoded");
 
         // decoding
         List<String> filesToDecode = new ArrayList<>();
