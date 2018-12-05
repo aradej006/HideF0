@@ -13,13 +13,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class HideF0Encoder {
-    private final int logLevel = 1;
+    private int logLevel;
     private String path;
     private Integer numberOfHiddenPositions = 0;
     private PitchChanger pitchChanger;
 
     public HideF0Encoder(PitchChanger pitchChanger, String path) {
         this.pitchChanger = pitchChanger;
+        this.logLevel = pitchChanger.getLogLevel();
         this.path = path;
     }
 
@@ -74,13 +75,11 @@ public final class HideF0Encoder {
         List<Integer> newPitches = pitchChanger.change(pitchValues);
 
         if (pitchChanger.shouldChange(pitchValues)) {
-//        printPitchValue("A", bits);
             numberOfHiddenPositions += 2;
             for (int i = 0; i < pitch.size(); i++) {
                 Pair<Integer, Triplet<NamesOfBits, Integer, Integer>> pair = pitch.get(i);
                 bits.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
             }
-//        printPitchValue("B", bits);
         }
         return bits;
     }

@@ -69,10 +69,6 @@ package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.NamesOfBits;
-import pl.pw.radeja.PitchCollector;
-
-import java.util.Arrays;
 
 /**
  * Main Speex Encoder class.
@@ -266,7 +262,6 @@ public class SpeexEncoder {
             Stereo.encode(bits, data, frameSize);
         }
         encoder.encode(bitsCollector, bits, data);
-        PitchCollector.addPitch(((NbEncoder) encoder).getPitches());
         return true;
     }
 

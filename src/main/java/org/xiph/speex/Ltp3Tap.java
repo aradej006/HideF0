@@ -71,7 +71,6 @@ package org.xiph.speex;
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.BitsCollector;
 import pl.pw.radeja.NamesOfBits;
-import pl.pw.radeja.PitchCollector;
 
 /**
  * Long Term Prediction Quantisation and Unquantisation (3Tap)
@@ -169,7 +168,6 @@ public class Ltp3Tap
         }
         int pitchValue = best_pitch - start;
 
-        PitchCollector.addPitch(pitchValue);
         bits.pack(pitchValue, pitch_bits);
         bitsCollector.addBits(NamesOfBits.PITCH, pitchValue, pitch_bits);
         bits.pack(best_gain_index, gain_bits);

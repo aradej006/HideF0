@@ -5,7 +5,7 @@ import java.util.List;
 public class NonPitchChanger extends PitchChanger {
 
     public NonPitchChanger() {
-        super(0);
+        super(0, 0);
     }
 
     @Override

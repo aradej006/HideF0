@@ -4,9 +4,11 @@ import java.util.List;
 
 public abstract class PitchChanger {
 
+    protected int logLevel;
     protected Integer threshold;
 
-    PitchChanger(Integer threshold) {
+    PitchChanger(int logLevel, Integer threshold) {
+        this.logLevel = logLevel;
         this.threshold = threshold;
     }
 
@@ -16,5 +18,9 @@ public abstract class PitchChanger {
 
     public Integer getThreshold() {
         return threshold;
+    }
+
+    public int getLogLevel() {
+        return logLevel;
     }
 }

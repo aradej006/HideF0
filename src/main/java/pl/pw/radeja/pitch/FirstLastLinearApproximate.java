@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 
 public class FirstLastLinearApproximate extends PitchChanger {
 
-    public FirstLastLinearApproximate(Integer threshold) {
-        super(threshold);
+    public FirstLastLinearApproximate(int logLevel, Integer threshold) {
+        super(logLevel, threshold);
     }
 
     @Override
@@ -22,12 +22,16 @@ public class FirstLastLinearApproximate extends PitchChanger {
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
         if (shouldChange(pitches)) {
-            System.out.println("A: " + pitches.stream().map(Objects::toString).collect(Collectors.joining(";")));
+            if (logLevel >= 1) {
+                System.out.println("A: " + pitches.stream().map(Objects::toString).collect(Collectors.joining(";")));
+            }
             for (int i = 0; i < pitches.size(); i++) {
                 result.add(LinearApprox(first, last, pitches.size(), i));
             }
-            System.out.println("B: " + result.stream().map(Objects::toString).collect(Collectors.joining(";")));
-            System.out.println("\n");
+            if (logLevel >= 1) {
+                System.out.println("B: " + result.stream().map(Objects::toString).collect(Collectors.joining(";")));
+                System.out.println("\n");
+            }
             return result;
         } else {
             return pitches;
