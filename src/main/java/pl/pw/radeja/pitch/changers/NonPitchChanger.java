@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch;
+package pl.pw.radeja.pitch.changers;
 
 import java.util.List;
 

@@ -40,7 +40,7 @@ import junit.framework.TestSuite;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.WaveToolbox;
 import pl.pw.radeja.HideF0Encoder;
-import pl.pw.radeja.pitch.NonPitchChanger;
+import pl.pw.radeja.pitch.changers.NonPitchChanger;
 
 import java.io.File;
 import java.io.IOException;

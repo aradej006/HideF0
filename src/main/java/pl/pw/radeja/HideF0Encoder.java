@@ -5,7 +5,8 @@ import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.Bits;
-import pl.pw.radeja.pitch.PitchChanger;
+import pl.pw.radeja.pitch.changers.PitchChanger;
+import pl.pw.radeja.pitch.collectors.PitchCollector;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,11 +18,13 @@ public final class HideF0Encoder {
     private String path;
     private Integer numberOfHiddenPositions = 0;
     private PitchChanger pitchChanger;
+    private PitchCollector pitchCollector;
 
     public HideF0Encoder(PitchChanger pitchChanger, String path) {
         this.pitchChanger = pitchChanger;
         this.logLevel = pitchChanger.getLogLevel();
         this.path = path;
+        this.pitchCollector = new PitchCollector(this.path, pitchChanger.getThreshold());
     }
 
     public void hide(BitsCollector bitsCollector) throws IOException {
@@ -81,6 +84,7 @@ public final class HideF0Encoder {
                 bits.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
             }
         }
+        pitchCollector.addPitch(bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()));
         return bits;
     }
 
@@ -99,5 +103,9 @@ public final class HideF0Encoder {
 
     public Integer getNumberOfHiddenPositions() {
         return numberOfHiddenPositions;
+    }
+
+    public PitchCollector getPitchCollector() {
+        return pitchCollector;
     }
 }

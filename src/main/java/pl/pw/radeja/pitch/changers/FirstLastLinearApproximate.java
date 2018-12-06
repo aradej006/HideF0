@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch;
+package pl.pw.radeja.pitch.changers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +48,8 @@ public class FirstLastLinearApproximate extends PitchChanger {
         for (int i = 0; i < pitches.size(); i++) {
             Integer val = pitches.get(i);
             Integer approx = LinearApprox(first, last, pitches.size(), i);
-            if (!((approx <= val && val + threshold <= approx) || (approx >= val && approx <= val + threshold))) {
+//            if (!((approx <= val && val + threshold <= approx) || (approx >= val && approx <= val + threshold))) {
+            if (Math.abs(approx - val) > threshold) {
                 return false;
             }
         }

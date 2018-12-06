@@ -1,4 +1,5 @@
 import org.apache.commons.lang3.time.StopWatch;
+import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.AllowPlaces;
 import pl.pw.radeja.AllowPlacesPrint;
@@ -7,9 +8,14 @@ import pl.pw.radeja.pesq.PesqResultPrinter;
 import pl.pw.radeja.pesq.PesqRunner;
 import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pesq.common.PesqResult;
-import pl.pw.radeja.pitch.FirstLastLinearApproximate;
+import pl.pw.radeja.pitch.changers.FirstLastLinearApproximate;
+import pl.pw.radeja.pitch.collectors.PitchCollector;
+import pl.pw.radeja.pitch.collectors.PitchCollectorPrint;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,8 +27,8 @@ public class FinePithExtractor {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         // calculate allow places
-        List<AllowPlaces> allowPlacesResult = calculateAllowPlaces(getSamples(), getThresholds());
-        AllowPlacesPrint.print(allowPlacesResult);
+        Pair<List<AllowPlaces>, List<PitchCollector>> result = calculateAllowPlaces(getSamples(), getThresholds());
+        AllowPlacesPrint.print(result.getValue0());
 
         // decoding
         List<String> filesToDecode = new ArrayList<>();
@@ -36,8 +42,19 @@ public class FinePithExtractor {
         List<PesqResult> pesqResults = PesqRunner.run(filesToPesq);
         PesqResultPrinter.print(pesqResults);
 
+        //print pitchValues
+        result.getValue1().forEach(pitchCollector -> {
+            try {
+                PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch.txt", "UTF-8");
+                PitchCollectorPrint.print(pitchCollector.getPitchValues(), printWriter, false).close();
+            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+        });
+
         //print results
-        AllowPlacesPrint.print(allowPlacesResult);
+        AllowPlacesPrint.print(result.getValue0());
         PesqResultPrinter.print(pesqResults);
         stopWatch.stop();
         System.out.println("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
@@ -72,7 +89,9 @@ public class FinePithExtractor {
     private static List<String> getSamples() {
         final String baseMalePath = "D:/PracaMgr/master-thesis/TIMIT_M/";
         final String baseFemalePath = "D:/PracaMgr/master-thesis/TIMIT_F/";
+//        final int maleLimit = 2;
         final int maleLimit = 25;
+//        final int femaleLimit = 1;
         final int femaleLimit = 25;
         List<String> samples = new ArrayList<>();
         for (int i = 1; i < maleLimit; i++) {
@@ -85,11 +104,13 @@ public class FinePithExtractor {
     }
 
     private static List<Integer> getThresholds() {
-        return Arrays.asList(0, 1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 128);
+        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 64);
+//        return Arrays.asList(0);
     }
 
-    private static List<AllowPlaces> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
-        List<AllowPlaces> results = Collections.synchronizedList(new ArrayList<>());
+    private static Pair<List<AllowPlaces>, List<PitchCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
+        List<AllowPlaces> allowPlaces = Collections.synchronizedList(new ArrayList<>());
+        List<PitchCollector> pitchCollectors = Collections.synchronizedList(new ArrayList<>());
 
         for (Integer threshold : thresholds) {
             ExecutorService es = Executors.newCachedThreadPool();
@@ -99,9 +120,12 @@ public class FinePithExtractor {
                         try {
                             encoder.encode();
                             HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
-                            synchronized (results) {
+                            synchronized (allowPlaces) {
                                 System.out.println("Encoded:\t" + path + "\t" + threshold + "\t" + hideF0Encoder.getNumberOfHiddenPositions());
-                                results.add(new AllowPlaces(path, threshold, hideF0Encoder.getNumberOfHiddenPositions()));
+                                allowPlaces.add(new AllowPlaces(path, threshold, hideF0Encoder.getNumberOfHiddenPositions()));
+                            }
+                            synchronized (pitchCollectors) {
+                                pitchCollectors.add(hideF0Encoder.getPitchCollector());
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -114,7 +138,7 @@ public class FinePithExtractor {
                 throw new Error("Some Error");
             }
         }
-        return results;
+        return new Pair<>(allowPlaces, pitchCollectors);
     }
 
     private static void runDecoding(List<String> paths) throws IOException {

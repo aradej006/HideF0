@@ -68,11 +68,9 @@
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.*;
 import pl.pw.radeja.HideF0Encoder;
-import pl.pw.radeja.pitch.FirstLastLinearApproximate;
-import pl.pw.radeja.pitch.NonPitchChanger;
+import pl.pw.radeja.pitch.changers.NonPitchChanger;
 
 import java.io.*;
-import java.util.Arrays;
 
 /**
  * Java Speex Command Line Encoder.
