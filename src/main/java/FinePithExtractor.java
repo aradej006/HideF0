@@ -24,38 +24,56 @@ import java.util.concurrent.TimeUnit;
 public class FinePithExtractor {
 
     public static void main(@NotNull final String[] args) throws InterruptedException, IOException {
+        boolean calculateAllowPlaces = false;
+        boolean decodeFiles = false;
+        boolean calculatePesq = true;
+
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         // calculate allow places
-        Pair<List<AllowPlaces>, List<PitchCollector>> result = calculateAllowPlaces(getSamples(), getThresholds());
-        AllowPlacesPrint.print(result.getValue0());
+        Pair<List<AllowPlaces>, List<PitchCollector>> result = new Pair<>(new ArrayList<>(), new ArrayList<>());
+        if (calculateAllowPlaces) {
+            result = calculateAllowPlaces(getSamples(), getThresholds());
+            AllowPlacesPrint.print(result.getValue0());
+        }
 
         // decoding
-        List<String> filesToDecode = new ArrayList<>();
-        getSamples().forEach(s -> getThresholds().forEach(t -> filesToDecode.add(s + "-hide-" + t)));
-        runDecoding(filesToDecode);
+        if (decodeFiles) {
+            List<String> filesToDecode = new ArrayList<>();
+            getSamples().forEach(s -> getThresholds().forEach(t -> filesToDecode.add(s + "-hide-" + t)));
+            runDecoding(filesToDecode);
+        }
 
 
         //pesq
-        List<PesqFiles> filesToPesq = new ArrayList<>();
-        getSamples().forEach(s -> getThresholds().forEach(t -> filesToPesq.add(new PesqFiles(s + "-hide-0-dec.wav", s + "-hide-" + t + "-dec.wav"))));
-        List<PesqResult> pesqResults = PesqRunner.run(filesToPesq);
-        PesqResultPrinter.print(pesqResults);
+        List<PesqResult> pesqResults = new ArrayList<>();
+        if (calculatePesq) {
+            List<PesqFiles> filesToPesq = new ArrayList<>();
+            getSamples().forEach(s -> getThresholds().forEach(t -> filesToPesq.add(new PesqFiles(s + ".wav", s + "-hide-" + t + "-dec.wav"))));
+            pesqResults = PesqRunner.run(filesToPesq);
+            PesqResultPrinter.print(pesqResults);
+        }
 
         //print pitchValues
-        result.getValue1().forEach(pitchCollector -> {
-            try {
-                PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch.txt", "UTF-8");
-                PitchCollectorPrint.print(pitchCollector.getPitchValues(), printWriter, false).close();
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+        if (calculateAllowPlaces) {
+            result.getValue1().forEach(pitchCollector -> {
+                try {
+                    PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch.txt", "UTF-8");
+                    PitchCollectorPrint.print(pitchCollector.getPitchValues(), printWriter, false).close();
+                } catch (FileNotFoundException | UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
 
-        });
+            });
+        }
 
         //print results
-        AllowPlacesPrint.print(result.getValue0());
-        PesqResultPrinter.print(pesqResults);
+        if (calculateAllowPlaces) {
+            AllowPlacesPrint.print(result.getValue0());
+        }
+        if (calculatePesq) {
+            PesqResultPrinter.print(pesqResults);
+        }
         stopWatch.stop();
         System.out.println("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
     }
