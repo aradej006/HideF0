@@ -16,6 +16,8 @@ public abstract class PitchChanger {
 
     public abstract boolean shouldChange(List<Integer> pitches);
 
+    public abstract boolean isLinear(List<Integer> pitches);
+
     public Integer getThreshold() {
         return threshold;
     }

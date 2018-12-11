@@ -78,7 +78,7 @@ public final class HideF0Encoder {
         List<Integer> newPitches = pitchChanger.change(pitchValues);
         boolean changed = false;
         if (pitchChanger.shouldChange(pitchValues)) {
-            changed = true;
+            changed = !pitchChanger.isLinear(pitchValues);
             numberOfHiddenPositions += 2;
             for (int i = 0; i < pitch.size(); i++) {
                 Pair<Integer, Triplet<NamesOfBits, Integer, Integer>> pair = pitch.get(i);

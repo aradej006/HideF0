@@ -43,17 +43,24 @@ public class FirstLastLinearApproximate extends PitchChanger {
     }
 
     public boolean shouldChange(List<Integer> pitches) {
+        return shouldChange(pitches, threshold);
+    }
+    private boolean shouldChange(List<Integer> pitches, Integer threshold) {
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
         for (int i = 0; i < pitches.size(); i++) {
             Integer val = pitches.get(i);
             Integer approx = LinearApprox(first, last, pitches.size(), i);
-//            if (!((approx <= val && val + threshold <= approx) || (approx >= val && approx <= val + threshold))) {
             if (Math.abs(approx - val) > threshold) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    @Override
+    public boolean isLinear(List<Integer> pitches) {
+        return shouldChange(pitches, 0);
     }
 }

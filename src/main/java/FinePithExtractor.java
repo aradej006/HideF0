@@ -127,8 +127,8 @@ public class FinePithExtractor {
     }
 
     private static List<Integer> getThresholds() {
-        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 64);
-//        return Arrays.asList(0);
+//        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 64);
+        return Arrays.asList(1, 2, 3, 10, 20, 30);
     }
 
     private static Pair<List<AllowPlaces>, List<PitchCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {

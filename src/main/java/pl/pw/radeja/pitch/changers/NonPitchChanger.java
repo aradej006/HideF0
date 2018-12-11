@@ -17,4 +17,9 @@ public class NonPitchChanger extends PitchChanger {
     public boolean shouldChange(List<Integer> pitches) {
         return false;
     }
+
+    @Override
+    public boolean isLinear(List<Integer> pitches) {
+        return false;
+    }
 }
