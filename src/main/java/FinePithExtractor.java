@@ -11,6 +11,7 @@ import pl.pw.radeja.pesq.common.PesqResult;
 import pl.pw.radeja.pitch.changers.FirstLastLinearApproximate;
 import pl.pw.radeja.pitch.collectors.PitchCollector;
 import pl.pw.radeja.pitch.collectors.PitchCollectorPrint;
+import pl.pw.radeja.weka.WekaPrinter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -24,9 +25,10 @@ import java.util.concurrent.TimeUnit;
 public class FinePithExtractor {
 
     public static void main(@NotNull final String[] args) throws InterruptedException, IOException {
-        boolean calculateAllowPlaces = false;
+        boolean calculateAllowPlaces = true;
         boolean decodeFiles = false;
-        boolean calculatePesq = true;
+        boolean calculatePesq = false;
+        boolean printWekaFile = true;
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -65,6 +67,9 @@ public class FinePithExtractor {
                 }
 
             });
+        }
+        if (printWekaFile) {
+            WekaPrinter.print(result.getValue1());
         }
 
         //print results

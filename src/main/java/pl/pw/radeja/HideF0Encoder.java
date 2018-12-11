@@ -76,15 +76,16 @@ public final class HideF0Encoder {
         // change: PitchChanger
         List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getValue1()).collect(Collectors.toList());
         List<Integer> newPitches = pitchChanger.change(pitchValues);
-
+        boolean changed = false;
         if (pitchChanger.shouldChange(pitchValues)) {
+            changed = true;
             numberOfHiddenPositions += 2;
             for (int i = 0; i < pitch.size(); i++) {
                 Pair<Integer, Triplet<NamesOfBits, Integer, Integer>> pair = pitch.get(i);
                 bits.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
             }
         }
-        pitchCollector.addPitch(bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()));
+        pitchCollector.addPitch(bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()), changed);
         return bits;
     }
 
