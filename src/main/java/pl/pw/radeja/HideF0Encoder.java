@@ -77,6 +77,8 @@ public final class HideF0Encoder {
         List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getValue1()).collect(Collectors.toList());
         List<Integer> newPitches = pitchChanger.change(pitchValues);
         boolean changed = false;
+        int calculatedThreshold = pitchChanger.calculateThreshold(pitchValues);
+        int calculatedThresholdAfterHideF0 = pitchChanger.calculateThreshold(newPitches);
         if (pitchChanger.shouldChange(pitchValues)) {
             changed = !pitchChanger.isLinear(pitchValues);
             numberOfHiddenPositions += 2;
@@ -85,7 +87,7 @@ public final class HideF0Encoder {
                 bits.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
             }
         }
-        pitchCollector.addPitch(bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()), changed);
+        pitchCollector.addPitch(bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()), changed, calculatedThreshold, calculatedThresholdAfterHideF0);
         return bits;
     }
 

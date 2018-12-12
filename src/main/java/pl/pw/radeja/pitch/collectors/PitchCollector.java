@@ -17,9 +17,9 @@ public class PitchCollector {
         pitchValues = Collections.synchronizedList(new ArrayList<>());
     }
 
-    public boolean addPitch(List<Integer> pitchValues, boolean changed) {
+    public boolean addPitch(List<Integer> pitchValues, boolean changed, Integer calculatedThreshold, Integer calculatedThresholdAfterHideF0) {
         numberOfFrame++;
-        return this.pitchValues.add(new PitchValue(numberOfFrame, pitchValues, changed));
+        return this.pitchValues.add(new PitchValue(numberOfFrame, pitchValues, changed, calculatedThreshold, calculatedThresholdAfterHideF0));
     }
 
     public List<PitchValue> getPitchValues() {

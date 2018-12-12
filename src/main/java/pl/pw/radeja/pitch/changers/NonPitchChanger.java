@@ -22,4 +22,9 @@ public class NonPitchChanger extends PitchChanger {
     public boolean isLinear(List<Integer> pitches) {
         return false;
     }
+
+    @Override
+    public Integer calculateThreshold(List<Integer> pitches) {
+        return null;
+    }
 }

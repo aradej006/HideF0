@@ -3,6 +3,7 @@ package pl.pw.radeja.pitch.changers;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class FirstLastLinearApproximate extends PitchChanger {
@@ -45,6 +46,7 @@ public class FirstLastLinearApproximate extends PitchChanger {
     public boolean shouldChange(List<Integer> pitches) {
         return shouldChange(pitches, threshold);
     }
+
     private boolean shouldChange(List<Integer> pitches, Integer threshold) {
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
@@ -57,6 +59,17 @@ public class FirstLastLinearApproximate extends PitchChanger {
         }
 
         return true;
+    }
+
+    @Override
+    public Integer calculateThreshold(List<Integer> pitches) {
+        List<Integer> approxValues = new ArrayList<>();
+        for (int i = 0; i < pitches.size(); i++) {
+            Integer val = pitches.get(i);
+            Integer approx = LinearApprox(pitches.get(0), pitches.get(pitches.size() - 1), pitches.size(), i);
+            approxValues.add(Math.abs(approx - val));
+        }
+        return approxValues.stream().max(Integer::compareTo).orElse(0);
     }
 
     @Override

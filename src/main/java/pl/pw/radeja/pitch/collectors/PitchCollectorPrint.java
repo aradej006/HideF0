@@ -2,7 +2,6 @@ package pl.pw.radeja.pitch.collectors;
 
 import java.io.PrintWriter;
 import java.util.List;
-import java.util.stream.IntStream;
 
 public class PitchCollectorPrint {
     public static void print(List<PitchValue> pitchValues) {

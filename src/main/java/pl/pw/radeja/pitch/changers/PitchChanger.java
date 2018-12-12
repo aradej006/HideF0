@@ -4,8 +4,8 @@ import java.util.List;
 
 public abstract class PitchChanger {
 
-    protected int logLevel;
-    protected Integer threshold;
+    int logLevel;
+    Integer threshold;
 
     PitchChanger(int logLevel, Integer threshold) {
         this.logLevel = logLevel;
@@ -15,6 +15,8 @@ public abstract class PitchChanger {
     public abstract List<Integer> change(List<Integer> pitches);
 
     public abstract boolean shouldChange(List<Integer> pitches);
+
+    public abstract Integer calculateThreshold(List<Integer> pitches);
 
     public abstract boolean isLinear(List<Integer> pitches);
 

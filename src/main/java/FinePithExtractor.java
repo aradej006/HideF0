@@ -9,6 +9,7 @@ import pl.pw.radeja.pesq.PesqRunner;
 import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pesq.common.PesqResult;
 import pl.pw.radeja.pitch.changers.FirstLastLinearApproximate;
+import pl.pw.radeja.pitch.collectors.CalculatedThresholdPrinter;
 import pl.pw.radeja.pitch.collectors.PitchCollector;
 import pl.pw.radeja.pitch.collectors.PitchCollectorPrint;
 import pl.pw.radeja.weka.WekaPrinter;
@@ -17,7 +18,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +32,8 @@ public class FinePithExtractor {
         boolean calculateAllowPlaces = true;
         boolean decodeFiles = false;
         boolean calculatePesq = false;
-        boolean printWekaFile = true;
+        boolean printWekaFile = false;
+        boolean printCalculatedThresholds = true;
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -60,7 +65,7 @@ public class FinePithExtractor {
         if (calculateAllowPlaces) {
             result.getValue1().forEach(pitchCollector -> {
                 try {
-                    PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch.txt", "UTF-8");
+                    PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch-" + pitchCollector.getThreshold() + ".txt", "UTF-8");
                     PitchCollectorPrint.print(pitchCollector.getPitchValues(), printWriter, false).close();
                 } catch (FileNotFoundException | UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -79,6 +84,10 @@ public class FinePithExtractor {
         if (calculatePesq) {
             PesqResultPrinter.print(pesqResults);
         }
+        if (printCalculatedThresholds) {
+            CalculatedThresholdPrinter.print(result.getValue1());
+        }
+
         stopWatch.stop();
         System.out.println("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
     }
@@ -112,10 +121,10 @@ public class FinePithExtractor {
     private static List<String> getSamples() {
         final String baseMalePath = "D:/PracaMgr/master-thesis/TIMIT_M/";
         final String baseFemalePath = "D:/PracaMgr/master-thesis/TIMIT_F/";
-//        final int maleLimit = 2;
-        final int maleLimit = 25;
-//        final int femaleLimit = 1;
-        final int femaleLimit = 25;
+        final int maleLimit = 2;
+//        final int maleLimit = 25;
+        final int femaleLimit = 2;
+//        final int femaleLimit = 25;
         List<String> samples = new ArrayList<>();
         for (int i = 1; i < maleLimit; i++) {
             samples.add(baseMalePath + i);
@@ -127,8 +136,8 @@ public class FinePithExtractor {
     }
 
     private static List<Integer> getThresholds() {
-//        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 64);
-        return Arrays.asList(1, 2, 3, 10, 20, 30);
+//        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
+        return Arrays.asList(5);
     }
 
     private static Pair<List<AllowPlaces>, List<PitchCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
