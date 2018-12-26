@@ -1,6 +1,5 @@
 package pl.pw.radeja.pesq;
 
-import org.javatuples.Pair;
 import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pesq.common.PesqResult;
 

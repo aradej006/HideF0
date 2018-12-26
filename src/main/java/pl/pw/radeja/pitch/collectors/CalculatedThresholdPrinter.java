@@ -69,9 +69,17 @@ public class CalculatedThresholdPrinter {
         Integer min = thresholds.indexOf(collector.getThreshold()) > 0 ? thresholds.get(thresholds.indexOf(collector.getThreshold()) - 1) : 0;
         return (int) collector.getPitchValues().stream().filter(p -> {
             if (collector.getThreshold() != 0) {
-                return p.getCalculatedThresholdAfterHideF0() <= collector.getThreshold() && p.getCalculatedThresholdAfterHideF0() > min;
+                if (p.isChanged()) {
+                    return p.getCalculatedThresholdAfterHideF0() <= collector.getThreshold() && p.getCalculatedThresholdAfterHideF0() > min;
+                } else {
+                    return p.getCalculatedThreshold() <= collector.getThreshold() && p.getCalculatedThreshold() > min;
+                }
             } else {
-                return p.getCalculatedThresholdAfterHideF0() == 0;
+                if (p.isChanged()) {
+                    return p.getCalculatedThresholdAfterHideF0() <= collector.getThreshold();
+                } else {
+                    return p.getCalculatedThreshold() <= collector.getThreshold();
+                }
             }
         }).count();
     }

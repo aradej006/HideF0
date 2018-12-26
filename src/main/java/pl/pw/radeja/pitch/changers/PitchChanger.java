@@ -3,7 +3,6 @@ package pl.pw.radeja.pitch.changers;
 import java.util.List;
 
 public abstract class PitchChanger {
-
     int logLevel;
     Integer threshold;
 

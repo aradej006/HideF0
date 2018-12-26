@@ -68,7 +68,7 @@
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.*;
 import pl.pw.radeja.HideF0Encoder;
-import pl.pw.radeja.pitch.changers.NonPitchChanger;
+import pl.pw.radeja.HideF0EncoderFirstLast;
 
 import java.io.*;
 
@@ -207,7 +207,7 @@ public class JSpeexEnc {
     public static void main(@NotNull final String[] args)
             throws IOException {
 
-        HideF0Encoder hideF0Encoder = new HideF0Encoder(new NonPitchChanger(), "dump");
+        HideF0Encoder hideF0Encoder = new HideF0EncoderFirstLast(0,0, "dump");
         @NotNull JSpeexEnc encoder = new JSpeexEnc(hideF0Encoder);
         if (encoder.parseArgs(args)) {
             encoder.encode();

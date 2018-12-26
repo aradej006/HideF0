@@ -1,14 +1,11 @@
 import org.apache.commons.lang3.time.StopWatch;
 import org.javatuples.Pair;
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.AllowPlaces;
-import pl.pw.radeja.AllowPlacesPrint;
-import pl.pw.radeja.HideF0Encoder;
+import pl.pw.radeja.*;
 import pl.pw.radeja.pesq.PesqResultPrinter;
 import pl.pw.radeja.pesq.PesqRunner;
 import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pesq.common.PesqResult;
-import pl.pw.radeja.pitch.changers.FirstLastLinearApproximate;
 import pl.pw.radeja.pitch.collectors.CalculatedThresholdPrinter;
 import pl.pw.radeja.pitch.collectors.PitchCollector;
 import pl.pw.radeja.pitch.collectors.PitchCollectorPrint;
@@ -29,10 +26,11 @@ import java.util.concurrent.TimeUnit;
 public class FinePithExtractor {
 
     public static void main(@NotNull final String[] args) throws InterruptedException, IOException {
+        String type = "FF"; // FF or FL
         boolean calculateAllowPlaces = true;
-        boolean decodeFiles = false;
-        boolean calculatePesq = false;
-        boolean printWekaFile = false;
+        boolean decodeFiles = true;
+        boolean calculatePesq = true;
+        boolean printWekaFile = true;
         boolean printCalculatedThresholds = true;
 
         StopWatch stopWatch = new StopWatch();
@@ -74,7 +72,7 @@ public class FinePithExtractor {
             });
         }
         if (printWekaFile) {
-            WekaPrinter.print(result.getValue1());
+            WekaPrinter.print(result.getValue1(), 50);
         }
 
         //print results
@@ -92,11 +90,10 @@ public class FinePithExtractor {
         System.out.println("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
     }
 
-    private static JSpeexEnc getSpeexEncoder(final String filename, final Integer threshold, final int logLevel) {
-        HideF0Encoder hideF0Encoder = new HideF0Encoder(new FirstLastLinearApproximate(logLevel, threshold), filename);
+    private static JSpeexEnc getSpeexEncoder(final HideF0Encoder hideF0Encoder) {
         @NotNull JSpeexEnc enc = new JSpeexEnc(hideF0Encoder);
-        enc.srcFile = filename + ".wav";
-        enc.destFile = filename + "-pitch.spx";
+        enc.srcFile = hideF0Encoder.getPath() + ".wav";
+        enc.destFile = hideF0Encoder.getPath() + "-pitch.spx";
         enc.srcFormat = JSpeexEnc.FILE_FORMAT_WAVE;
         enc.destFormat = JSpeexEnc.FILE_FORMAT_OGG;
         enc.printlevel = JSpeexEnc.DEBUG;
@@ -121,10 +118,10 @@ public class FinePithExtractor {
     private static List<String> getSamples() {
         final String baseMalePath = "D:/PracaMgr/master-thesis/TIMIT_M/";
         final String baseFemalePath = "D:/PracaMgr/master-thesis/TIMIT_F/";
-        final int maleLimit = 2;
-//        final int maleLimit = 25;
-        final int femaleLimit = 2;
-//        final int femaleLimit = 25;
+//        final int maleLimit = 2;
+        final int maleLimit = 25;
+//        final int femaleLimit = 1;
+        final int femaleLimit = 25;
         List<String> samples = new ArrayList<>();
         for (int i = 1; i < maleLimit; i++) {
             samples.add(baseMalePath + i);
@@ -136,8 +133,8 @@ public class FinePithExtractor {
     }
 
     private static List<Integer> getThresholds() {
-//        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
-        return Arrays.asList(5);
+        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
+//        return Arrays.asList(5);
     }
 
     private static Pair<List<AllowPlaces>, List<PitchCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
@@ -148,7 +145,9 @@ public class FinePithExtractor {
             ExecutorService es = Executors.newCachedThreadPool();
             paths.forEach(path ->
                     es.execute(() -> {
-                        @NotNull JSpeexEnc encoder = getSpeexEncoder(path, threshold, 0);
+//                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstLast(1, threshold, path));
+//                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(1, threshold, path));
+                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(1, threshold, path));
                         try {
                             encoder.encode();
                             HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();

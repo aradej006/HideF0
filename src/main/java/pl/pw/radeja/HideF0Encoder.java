@@ -13,12 +13,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public final class HideF0Encoder {
-    private int logLevel;
-    private String path;
-    private Integer numberOfHiddenPositions = 0;
-    private PitchChanger pitchChanger;
-    private PitchCollector pitchCollector;
+public abstract class HideF0Encoder {
+    protected int logLevel;
+    protected String path;
+    protected Integer numberOfHiddenPositions = 0;
+    protected Integer hiddenPositionPerFrame = 0;
+    protected PitchChanger pitchChanger;
+    protected PitchCollector pitchCollector;
 
     public HideF0Encoder(PitchChanger pitchChanger, String path) {
         this.pitchChanger = pitchChanger;
@@ -30,8 +31,10 @@ public final class HideF0Encoder {
     public void hide(BitsCollector bitsCollector) throws IOException {
         AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "-hide-" + pitchChanger.getThreshold() + ".spx"));
         Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> chunks = getChunks(bitsCollector);
-        for (int i = 1; i <= chunks.size(); i++) {
-            saveChunk(writer, chunks.get(i));
+        for (int i = 2; i <= chunks.size(); i++) {
+            List<Triplet<NamesOfBits, Integer, Integer>> chunk = chunks.get(i - 1);
+            List<Triplet<NamesOfBits, Integer, Integer>> nextChunk = chunks.get(i);
+            saveChunk(writer, chunk, nextChunk);
         }
         if (logLevel >= 1) {
             System.out.println("Number of hidden positions: " + numberOfHiddenPositions);
@@ -39,7 +42,7 @@ public final class HideF0Encoder {
         writer.close();
     }
 
-    private Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> getChunks(BitsCollector bitsCollector) {
+    protected Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> getChunks(BitsCollector bitsCollector) {
         Map<Integer, List<Triplet<NamesOfBits, Integer, Integer>>> chunks = new HashMap<>();
         List<Triplet<NamesOfBits, Integer, Integer>> chunk = new ArrayList<>();
         for (int i = 0; i < bitsCollector.getBitsToSave().size(); i++) {
@@ -53,9 +56,9 @@ public final class HideF0Encoder {
         return chunks;
     }
 
-    private void saveChunk(AudioFileWriter writer, List<Triplet<NamesOfBits, Integer, Integer>> bitsToSave) throws IOException {
+    protected void saveChunk(AudioFileWriter writer, List<Triplet<NamesOfBits, Integer, Integer>> chunk, List<Triplet<NamesOfBits, Integer, Integer>> nextChunk) throws IOException {
         @NotNull byte[] temp = new byte[2560];
-        List<Triplet<NamesOfBits, Integer, Integer>> changed = changePitchValues(bitsToSave);
+        List<Triplet<NamesOfBits, Integer, Integer>> changed = changePitchValues(chunk, nextChunk);
         Bits bits = new Bits();
         bits.init();
         changed.forEach(b -> bits.pack(b.getValue1(), b.getValue2()));
@@ -66,13 +69,20 @@ public final class HideF0Encoder {
         }
     }
 
-    private List<Triplet<NamesOfBits, Integer, Integer>> changePitchValues(List<Triplet<NamesOfBits, Integer, Integer>> bits) {
+    protected List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> getPitches(List<Triplet<NamesOfBits, Integer, Integer>> chunk) {
         List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> pitch = new ArrayList<>();
-        for (int i = 0; i < bits.size(); i++) {
-            if (bits.get(i).getValue0().equals(NamesOfBits.PITCH)) {
-                pitch.add(new Pair<>(i, bits.get(i)));
+        for (int i = 0; i < chunk.size(); i++) {
+            if (chunk.get(i).getValue0().equals(NamesOfBits.PITCH)) {
+                pitch.add(new Pair<>(i, chunk.get(i)));
             }
         }
+        return pitch;
+    }
+
+    protected abstract List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> getPitches(List<Triplet<NamesOfBits, Integer, Integer>> chunk, List<Triplet<NamesOfBits, Integer, Integer>> nextChunk);
+
+    protected List<Triplet<NamesOfBits, Integer, Integer>> changePitchValues(List<Triplet<NamesOfBits, Integer, Integer>> chunk, List<Triplet<NamesOfBits, Integer, Integer>> nextChunk) {
+        List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> pitch = getPitches(chunk, nextChunk);
         // change: PitchChanger
         List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getValue1()).collect(Collectors.toList());
         List<Integer> newPitches = pitchChanger.change(pitchValues);
@@ -81,17 +91,17 @@ public final class HideF0Encoder {
         int calculatedThresholdAfterHideF0 = pitchChanger.calculateThreshold(newPitches);
         if (pitchChanger.shouldChange(pitchValues)) {
             changed = !pitchChanger.isLinear(pitchValues);
-            numberOfHiddenPositions += 2;
-            for (int i = 0; i < pitch.size(); i++) {
+            numberOfHiddenPositions += hiddenPositionPerFrame;
+            for (int i = 0; i < 4; i++) {
                 Pair<Integer, Triplet<NamesOfBits, Integer, Integer>> pair = pitch.get(i);
-                bits.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
+                chunk.set(pair.getValue0(), pair.getValue1().setAt1(newPitches.get(i)));
             }
         }
-        pitchCollector.addPitch(bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()), changed, calculatedThreshold, calculatedThresholdAfterHideF0);
-        return bits;
+        pitchCollector.addPitch(chunk.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH)).map(Triplet::getValue1).collect(Collectors.toList()), changed, calculatedThreshold, calculatedThresholdAfterHideF0);
+        return chunk;
     }
 
-    private void printPitchValue(String prefix, List<Triplet<NamesOfBits, Integer, Integer>> bits) {
+    protected void printPitchValue(String prefix, List<Triplet<NamesOfBits, Integer, Integer>> bits) {
         if (logLevel >= 1) {
             System.out.println(prefix + ": " +
                     bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH))
@@ -101,7 +111,6 @@ public final class HideF0Encoder {
 
             );
         }
-
     }
 
     public Integer getNumberOfHiddenPositions() {
@@ -110,5 +119,9 @@ public final class HideF0Encoder {
 
     public PitchCollector getPitchCollector() {
         return pitchCollector;
+    }
+
+    public String getPath() {
+        return path;
     }
 }
