@@ -21,13 +21,13 @@ public class LinearApproximateChanger extends PitchChanger {
         List<Integer> result = new ArrayList<>();
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
-        if (logLevel >= 1) {
+        if (logLevel >= 2) {
             System.out.println("A: " + pitches.stream().map(Objects::toString).collect(Collectors.joining(";")));
         }
         for (int i = 0; i < 4; i++) {
             result.add(LinearApprox(first, last, pitches.size(), i));
         }
-        if (logLevel >= 1) {
+        if (logLevel >= 2) {
             System.out.println("B: " + result.stream().map(Objects::toString).collect(Collectors.joining(";")));
             System.out.println("\n");
         }

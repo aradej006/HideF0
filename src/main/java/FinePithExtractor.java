@@ -28,10 +28,10 @@ public class FinePithExtractor {
     public static void main(@NotNull final String[] args) throws InterruptedException, IOException {
         String type = "FF"; // FF or FL
         boolean calculateAllowPlaces = true;
-        boolean decodeFiles = true;
-        boolean calculatePesq = true;
+        boolean decodeFiles = false;
+        boolean calculatePesq = false;
         boolean printWekaFile = true;
-        boolean printCalculatedThresholds = true;
+        boolean printCalculatedThresholds = false;
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
@@ -72,7 +72,7 @@ public class FinePithExtractor {
             });
         }
         if (printWekaFile) {
-            WekaPrinter.print(result.getValue1(), 50);
+            WekaPrinter.print(result.getValue1(), 1);
         }
 
         //print results
@@ -132,7 +132,7 @@ public class FinePithExtractor {
         return samples;
     }
 
-    private static List<Integer> getThresholds() {
+    static List<Integer> getThresholds() {
         return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
 //        return Arrays.asList(5);
     }
