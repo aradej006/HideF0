@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class WekaPrinter {
@@ -22,33 +23,42 @@ public final class WekaPrinter {
 
     public static void print(List<PitchCollector> pitchCollectors, int numberOfFrames) {
         Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
+        printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining);
+        printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest);
+    }
+
+    private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector, int numberOfFrames, String name, Predicate<PitchCollector> filter) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
-                PrintWriter pw = new PrintWriter(filePath + threshold + "-" + numberOfFrames + extension, "UTF-8");
-                PrintWriter pwFft = new PrintWriter(filePath + threshold + "-fft-" + numberOfFrames + extension, "UTF-8");
+                PrintWriter pw = new PrintWriter(filePath + threshold + "-" + numberOfFrames + '-' + name + extension, "UTF-8");
+                PrintWriter pwFft = new PrintWriter(filePath + threshold + "-fft-" + numberOfFrames + '-' + name + extension, "UTF-8");
                 printHeader(pw, numberOfFrames);
                 printFftHeader(pwFft, numberOfFrames);
-                pitchCollectorList.forEach(pitchCollector ->
-                        partition(pitchCollector.getPitchValues(), numberOfFrames).stream()
-                                .filter(p -> p.size() == numberOfFrames)
-                                .forEach(p -> {
-                                    boolean hasHideF0 = p.stream().anyMatch(PitchValue::isChanged);
-                                    List<Complex> fftPitchValues = new ArrayList<>();
-                                    for (PitchValue pitchValue1 : p) {
-                                        fftPitchValues.addAll(doFFT(pitchValue1.getPitchValues()));
-                                    }
-                                    //print normal
-                                    pw.println(p.stream()
-                                            .flatMap(pitchValue -> pitchValue.getPitchValues().stream())
-                                            .map(Objects::toString)
-                                            .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaPrinter.hasHideF0 : WekaPrinter.hasNotHideF0));
-                                    //print Fourier Transform values
-                                    pwFft.println(fftPitchValues.stream()
-                                            .map(Complex::abs)
-                                            .map(Objects::toString)
-                                            .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaPrinter.hasHideF0 : WekaPrinter.hasNotHideF0));
-                                })
-                );
+                pitchCollectorList
+                        .stream()
+                        .filter(filter)
+                        .forEach(pitchCollector ->
+                                partition(pitchCollector.getPitchValues(), numberOfFrames)
+                                        .stream()
+                                        .filter(p -> p.size() == numberOfFrames)
+                                        .forEach(p -> {
+                                            boolean hasHideF0 = p.stream().anyMatch(PitchValue::isChanged);
+                                            List<Complex> fftPitchValues = new ArrayList<>();
+                                            for (PitchValue pitchValue1 : p) {
+                                                fftPitchValues.addAll(doFFT(pitchValue1.getPitchValues()));
+                                            }
+                                            //print normal
+                                            pw.println(p.stream()
+                                                    .flatMap(pitchValue -> pitchValue.getPitchValues().stream())
+                                                    .map(Objects::toString)
+                                                    .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaPrinter.hasHideF0 : WekaPrinter.hasNotHideF0));
+                                            //print Fourier Transform values
+                                            pwFft.println(fftPitchValues.stream()
+                                                    .map(Complex::abs)
+                                                    .map(Objects::toString)
+                                                    .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaPrinter.hasHideF0 : WekaPrinter.hasNotHideF0));
+                                        })
+                        );
                 pw.close();
                 pwFft.close();
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
@@ -97,4 +107,15 @@ public final class WekaPrinter {
                 .values();
     }
 
+    private static Predicate<PitchCollector> isTraining = (p) -> WekaPrinter.TRAINING_SET.contains(p.getSampleName());
+    private static Predicate<PitchCollector> isTest = (p) -> WekaPrinter.TEST_SET.contains(p.getSampleName());
+
+
+    private static List<String> TRAINING_SET = Arrays.asList(
+            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16",
+            "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "M14", "M15", "M16");
+
+    private static List<String> TEST_SET = Arrays.asList(
+            "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
+            "M17", "M18", "M19", "M20", "M21", "M22", "M23", "M24");
 }

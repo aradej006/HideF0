@@ -17,27 +17,26 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class WekaResultsCollector {
 
+    static String trainExt = "-1-train.arff";
+    static String testExt = "-1-test.arff";
+
     public static void main(@NotNull final String[] args) {
-        float percentageSplit = 66f;
         List<WekaResult> results = Collections.synchronizedList(new ArrayList<>());
         List<Integer> thresholds = FinePithExtractor.getThresholds();
-//        List<Integer> thresholds =  Arrays.asList(0, 1);
 
-        String path = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
-        String extension = "-1.arff";
+        String path = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
         thresholds.forEach(th -> {
             try {
-                runMachineLearning(path + th + extension, percentageSplit, results);
+                runMachineLearning(path + th, results);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -60,19 +59,16 @@ public class WekaResultsCollector {
         return classifiers;
     }
 
-    private static void runMachineLearning(String path, float percentageSplit, List<WekaResult> results) throws IOException {
+    private static void runMachineLearning(String path, List<WekaResult> results) throws IOException {
         System.out.println("Running data for:\t" + path);
-        ArffLoader.ArffReader loader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path)));
+        ArffLoader.ArffReader trainLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + trainExt)));
+        ArffLoader.ArffReader testLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + testExt)));
 
-        Instances inst = loader.getData();
-        inst.setClassIndex(inst.numAttributes() - 1);
+        Instances train = trainLoader.getData();
+        train.setClassIndex(train.numAttributes() - 1);
+        Instances test = testLoader.getData();
+        test.setClassIndex(test.numAttributes() - 1);
         System.out.println("Loaded data for:\t" + path);
-
-        int trainSize = Math.round(inst.numInstances() * percentageSplit / 100);
-        int testSize = inst.numInstances() - trainSize;
-        Instances train = new Instances(inst, 0, trainSize);
-        Instances test = new Instances(inst, trainSize, testSize);
-
 
         List<Classifier> cls = getClassifiers();
         cls.forEach(c -> {
