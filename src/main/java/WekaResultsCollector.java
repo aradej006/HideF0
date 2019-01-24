@@ -19,13 +19,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class WekaResultsCollector {
 
     static String trainExt = "-1-train.arff";
     static String testExt = "-1-test.arff";
 
-    public static void main(@NotNull final String[] args) {
+    public static void main(@NotNull final String[] args) throws InterruptedException {
         List<WekaResult> results = Collections.synchronizedList(new ArrayList<>());
         List<Integer> thresholds = FinePithExtractor.getThresholds();
 
@@ -33,14 +36,21 @@ public class WekaResultsCollector {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-
-        thresholds.forEach(th -> {
+        ExecutorService es = Executors.newCachedThreadPool();
+        thresholds.forEach(th -> es.execute(() -> {
             try {
                 runMachineLearning(path + th, results);
-            } catch (IOException e) {
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        });
+        }));
+
+        es.shutdown();
+        boolean finished = es.awaitTermination(24, TimeUnit.HOURS);
+        if (!finished) {
+            throw new Error("Some Error");
+        }
+
 
         WekaResultPrinter.print(results);
 
@@ -50,50 +60,59 @@ public class WekaResultsCollector {
 
     static List<Classifier> getClassifiers() {
         List<Classifier> classifiers = new ArrayList<>();
-        classifiers.add(new RandomForest());
-        classifiers.add(new NaiveBayes());
-        classifiers.add(new MultilayerPerceptron());
-        classifiers.add(new Logistic());
-        classifiers.add(new SMO());
         classifiers.add(new AdaBoostM1());
+        classifiers.add(new Logistic());
+        classifiers.add(new MultilayerPerceptron());
+        classifiers.add(new NaiveBayes());
+        classifiers.add(new RandomForest());
+//        classifiers.add(new SMO());
         return classifiers;
     }
 
-    private static void runMachineLearning(String path, List<WekaResult> results) throws IOException {
-        System.out.println("Running data for:\t" + path);
-        ArffLoader.ArffReader trainLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + trainExt)));
-        ArffLoader.ArffReader testLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + testExt)));
-
-        Instances train = trainLoader.getData();
-        train.setClassIndex(train.numAttributes() - 1);
-        Instances test = testLoader.getData();
-        test.setClassIndex(test.numAttributes() - 1);
-        System.out.println("Loaded data for:\t" + path);
-
+    private static void runMachineLearning(String path, List<WekaResult> results) throws InterruptedException {
         List<Classifier> cls = getClassifiers();
-        cls.forEach(c -> {
-            System.out.println("Building for:\t" + path + "\tClassifier:\t" + c.getClass().getName());
-            try {
-                c.buildClassifier(train);
-                System.out.println("Built for:\t" + path + "\tClassifier:\t" + c.getClass().getName());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+        ExecutorService es = Executors.newCachedThreadPool();
 
-        cls.forEach(c -> {
-            System.out.println("Evaluating for:\t" + path + "\tClassifier:\t" + c.getClass().getName());
+        cls.forEach(classifier -> es.execute(() -> {
             try {
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+                System.out.println("Running data for:\t" + path);
+                ArffLoader.ArffReader trainLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + trainExt)));
+                ArffLoader.ArffReader testLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + testExt)));
+
+                Instances train = trainLoader.getData();
+                train.setClassIndex(train.numAttributes() - 1);
+                Instances test = testLoader.getData();
+                test.setClassIndex(test.numAttributes() - 1);
+                System.out.println("Loaded data for:\t" + path);
+
+                System.out.println("Building for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
+                classifier.buildClassifier(train);
+                System.out.println("Built for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
+
+                System.out.println("Evaluating for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
+
                 Evaluation eval = new Evaluation(train);
-                eval.evaluateModel(c, test);
+                eval.evaluateModel(classifier, test);
+                WekaResult result = new WekaResult(eval, classifier, path);
                 synchronized (results) {
-                    results.add(new WekaResult(eval, c, path));
+                    results.add(result);
                 }
-                System.out.println("Evaluated for:\t" + path + "\tClassifier:\t" + c.getClass().getName());
+                System.out.println("Evaluated for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
+                System.out.println("Result:\t" + result.getPtcCorrect() + "\t" + result.getRocArea());
+                stopWatch.stop();
+                System.out.println("Total time:" + (stopWatch.getTime() / 1000) + "[s]\n\n");
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        }));
+
+        es.shutdown();
+        boolean finished = es.awaitTermination(24, TimeUnit.HOURS);
+        if (!finished) {
+            throw new Error("Some Error");
+        }
     }
 
 }

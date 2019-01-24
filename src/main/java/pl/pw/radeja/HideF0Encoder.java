@@ -90,7 +90,7 @@ public abstract class HideF0Encoder {
         int calculatedThreshold = pitchChanger.calculateThreshold(pitchValues);
         int calculatedThresholdAfterHideF0 = pitchChanger.calculateThreshold(newPitches);
         if (pitchChanger.shouldChange(pitchValues)) {
-            changed = !pitchChanger.isLinear(pitchValues);
+            changed = true;
             numberOfHiddenPositions += hiddenPositionPerFrame;
             for (int i = 0; i < 4; i++) {
                 Pair<Integer, Triplet<NamesOfBits, Integer, Integer>> pair = pitch.get(i);

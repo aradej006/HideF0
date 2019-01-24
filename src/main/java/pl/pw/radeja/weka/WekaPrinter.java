@@ -19,15 +19,21 @@ public final class WekaPrinter {
     private final static String hasHideF0 = "HideF0";
     private final static String hasNotHideF0 = "NoHideF0";
     private final static DoubleFFT_1D FFT = new DoubleFFT_1D(4);
+    private final static Long seed = 1L;
+    private final static Random rand = new Random(seed);
 
 
     public static void print(List<PitchCollector> pitchCollectors, int numberOfFrames) {
         Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
-        printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining);
-        printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest);
+        printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining, hasHideF0SaverTraining);
+        printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest, hasHideF0SaverTest);
     }
 
-    private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector, int numberOfFrames, String name, Predicate<PitchCollector> filter) {
+    private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector,
+                                       int numberOfFrames,
+                                       String name,
+                                       Predicate<PitchCollector> filter,
+                                       Predicate<List<PitchValue>> hasHideF0Saver) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
                 PrintWriter pw = new PrintWriter(filePath + threshold + "-" + numberOfFrames + '-' + name + extension, "UTF-8");
@@ -42,7 +48,7 @@ public final class WekaPrinter {
                                         .stream()
                                         .filter(p -> p.size() == numberOfFrames)
                                         .forEach(p -> {
-                                            boolean hasHideF0 = p.stream().anyMatch(PitchValue::isChanged);
+                                            boolean hasHideF0 = hasHideF0Saver.test(p);
                                             List<Complex> fftPitchValues = new ArrayList<>();
                                             for (PitchValue pitchValue1 : p) {
                                                 fftPitchValues.addAll(doFFT(pitchValue1.getPitchValues()));
@@ -108,7 +114,17 @@ public final class WekaPrinter {
     }
 
     private static Predicate<PitchCollector> isTraining = (p) -> WekaPrinter.TRAINING_SET.contains(p.getSampleName());
+    private static Predicate<List<PitchValue>> hasHideF0SaverTraining = (p) -> {
+        boolean isChanged = p.stream().anyMatch(PitchValue::isChanged);
+        long thZeroCount = p.stream().filter(v -> v.getCalculatedThreshold() == 0).count();
+        if (thZeroCount == (long) p.size() && rand.nextInt(100) < 10) {
+            return true;
+        } else {
+            return isChanged;
+        }
+    };
     private static Predicate<PitchCollector> isTest = (p) -> WekaPrinter.TEST_SET.contains(p.getSampleName());
+    private static Predicate<List<PitchValue>> hasHideF0SaverTest = (p) -> p.stream().anyMatch(PitchValue::isChanged);
 
 
     private static List<String> TRAINING_SET = Arrays.asList(

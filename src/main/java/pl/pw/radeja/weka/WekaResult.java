@@ -37,4 +37,9 @@ public class WekaResult {
     public Integer getThreshold() {
         return Integer.parseInt(path.substring(path.indexOf("hideF0-") + 7).replace("-1.arff", ""));
     }
+
+    @Override
+    public String toString() {
+        return "PtcCorrect:\t" + getPtcCorrect() + "\tROC Area:\t" + getRocArea() + "\tClassifier:\t" + getClassifier();
+    }
 }

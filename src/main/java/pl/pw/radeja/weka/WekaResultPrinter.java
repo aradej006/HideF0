@@ -14,7 +14,7 @@ public class WekaResultPrinter {
         Collections.sort(thresholds);
         List<String> classifiers = getClassifiers(resultMap);
         System.out.println("\t\t\tWekaResults\t");
-        System.out.println("Threshold\t" + getClassifierNames(resultMap));
+        System.out.println("Threshold\t" + String.join("\t\t", classifiers));
         System.out.println("Threshold\t" + classifiers.stream().map(c -> "PrcCorrect\tROC Area").collect(Collectors.joining("\t")));
         thresholds.forEach(th -> {
             AtomicReference<String> line = new AtomicReference<>(th.toString() + '\t');
@@ -40,12 +40,6 @@ public class WekaResultPrinter {
         ArrayList<String> classifiers = new ArrayList<>(resultMap.get(resultMap.keySet().iterator().next()).keySet());
         Collections.sort(classifiers);
         return classifiers;
-    }
-
-    private static String getClassifierNames(Map<Integer, Map<String, WekaResult>> resultMap) {
-        return String.join("\t\t", resultMap
-                .get(resultMap.keySet().iterator().next())
-                .keySet());
     }
 
     private static String getClassifierName(Classifier c) {
