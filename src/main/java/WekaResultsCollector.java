@@ -15,10 +15,7 @@ import weka.core.converters.ArffLoader;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -29,21 +26,26 @@ public class WekaResultsCollector {
     static String testExt = "-1-test.arff";
 
     public static void main(@NotNull final String[] args) throws InterruptedException {
-        List<WekaResult> results = Collections.synchronizedList(new ArrayList<>());
         List<Integer> thresholds = FinePithExtractor.getThresholds();
-
-        String path = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
+        Map<String, List<WekaResult>> resultsMap = new HashMap<>();
+        String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
+        resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
+        String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
+        resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
+        String pathFLRand = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
+        resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
+        List<String> paths = Arrays.asList(pathFL, pathFF, pathFLRand);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         ExecutorService es = Executors.newCachedThreadPool();
-        thresholds.forEach(th -> es.execute(() -> {
+        thresholds.forEach(th -> es.execute(() -> paths.forEach(path -> {
             try {
-                runMachineLearning(path + th, results);
+                runMachineLearning(path + th, resultsMap.get(path));
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }));
+        })));
 
         es.shutdown();
         boolean finished = es.awaitTermination(24, TimeUnit.HOURS);
@@ -51,8 +53,10 @@ public class WekaResultsCollector {
             throw new Error("Some Error");
         }
 
-
-        WekaResultPrinter.print(results);
+        resultsMap.forEach((path, results) -> {
+            System.out.println("\n\nResults for " + path + ":");
+            WekaResultPrinter.print(results);
+        });
 
         stopWatch.stop();
         System.out.println("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
@@ -65,7 +69,7 @@ public class WekaResultsCollector {
         classifiers.add(new MultilayerPerceptron());
         classifiers.add(new NaiveBayes());
         classifiers.add(new RandomForest());
-//        classifiers.add(new SMO());
+        classifiers.add(new SMO());
         return classifiers;
     }
 
