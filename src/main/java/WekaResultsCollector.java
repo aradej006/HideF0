@@ -28,18 +28,17 @@ public class WekaResultsCollector {
     public static void main(@NotNull final String[] args) throws InterruptedException {
         List<Integer> thresholds = FinePithExtractor.getThresholds();
         Map<String, List<WekaResult>> resultsMap = new HashMap<>();
-        String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
-        resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
-        String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
-        resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
+//        String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
+//        resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
+//        String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
+//        resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
         String pathFLRand = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
         resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
-        List<String> paths = Arrays.asList(pathFL, pathFF, pathFLRand);
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         ExecutorService es = Executors.newCachedThreadPool();
-        thresholds.forEach(th -> es.execute(() -> paths.forEach(path -> {
+        thresholds.forEach(th -> es.execute(() -> resultsMap.keySet().forEach(path -> {
             try {
                 runMachineLearning(path + th, resultsMap.get(path));
             } catch (InterruptedException e) {
@@ -64,12 +63,12 @@ public class WekaResultsCollector {
 
     static List<Classifier> getClassifiers() {
         List<Classifier> classifiers = new ArrayList<>();
-        classifiers.add(new AdaBoostM1());
-        classifiers.add(new Logistic());
-        classifiers.add(new MultilayerPerceptron());
-        classifiers.add(new NaiveBayes());
+//        classifiers.add(new AdaBoostM1());
+//        classifiers.add(new Logistic());
+//        classifiers.add(new MultilayerPerceptron());
+//        classifiers.add(new NaiveBayes());
         classifiers.add(new RandomForest());
-        classifiers.add(new SMO());
+//        classifiers.add(new SMO());
         return classifiers;
     }
 

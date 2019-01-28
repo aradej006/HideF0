@@ -67,6 +67,7 @@
 
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.*;
+import pl.pw.radeja.BitsCollector;
 import pl.pw.radeja.HideF0Encoder;
 import pl.pw.radeja.HideF0EncoderFirstLast;
 
@@ -367,9 +368,9 @@ public class JSpeexEnc {
      *
      * @throws IOException
      */
-    public void encode()
+    public BitsCollector encode()
             throws IOException {
-        encode(new File(srcFile), new File(destFile));
+        return encode(new File(srcFile), new File(destFile));
     }
 
     /**
@@ -379,7 +380,7 @@ public class JSpeexEnc {
      * @param destPath
      * @throws IOException
      */
-    public void encode(@NotNull final File srcPath, final File destPath)
+    public BitsCollector encode(@NotNull final File srcPath, final File destPath)
             throws IOException {
         @NotNull byte[] temp = new byte[2560]; // stereo UWB requires one to read 2560b
         final int HEADERSIZE = 8;
@@ -402,7 +403,7 @@ public class JSpeexEnc {
             if (!RIFF.equals(new String(temp, 0, 4)) &&
                     !WAVE.equals(new String(temp, 8, 4))) {
                 System.err.println("Not a WAVE file");
-                return;
+                return null;
             }
             // Read other header chunks
             dis.readFully(temp, 0, HEADERSIZE);
@@ -424,13 +425,13 @@ public class JSpeexEnc {
           */
                     if (readShort(temp, 0) != WAVE_FORMAT_PCM) {
                         System.err.println("Not a PCM file");
-                        return;
+                        return null;
                     }
                     channels = readShort(temp, 2);
                     sampleRate = readInt(temp, 4);
                     if (readShort(temp, 14) != 16) {
                         System.err.println("Not a 16 bit file " + readShort(temp, 18));
-                        return;
+                        return null;
                     }
                     // Display audio info
                     if (printlevel <= DEBUG) {
@@ -545,6 +546,7 @@ public class JSpeexEnc {
         hideF0Encoder.hide(speexEncoder.getBitsCollector());
         writer.close();
         dis.close();
+        return speexEncoder.getBitsCollector();
     }
 
     /**

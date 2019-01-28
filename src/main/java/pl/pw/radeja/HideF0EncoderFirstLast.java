@@ -19,7 +19,7 @@ public class HideF0EncoderFirstLast extends HideF0Encoder {
         hiddenPositionPerFrame = 2;
     }
 
-    protected List<Pair<Integer, Triplet<NamesOfBits, Integer, Integer>>> getPitches(List<Triplet<NamesOfBits, Integer, Integer>> chunk, List<Triplet<NamesOfBits, Integer, Integer>> nextChunk) {
+    protected List<Pair<Integer, SpeexBits>> getPitches(List<SpeexBits> chunk, List<SpeexBits> nextChunk) {
         return getPitches(chunk);
     }
 }

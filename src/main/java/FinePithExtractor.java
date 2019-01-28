@@ -1,6 +1,8 @@
 import org.apache.commons.lang3.time.StopWatch;
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
+import org.xiph.speex.Bits;
 import pl.pw.radeja.*;
 import pl.pw.radeja.pesq.PesqResultPrinter;
 import pl.pw.radeja.pesq.PesqRunner;
@@ -9,19 +11,18 @@ import pl.pw.radeja.pesq.common.PesqResult;
 import pl.pw.radeja.pitch.collectors.CalculatedThresholdPrinter;
 import pl.pw.radeja.pitch.collectors.PitchCollector;
 import pl.pw.radeja.pitch.collectors.PitchCollectorPrint;
+import pl.pw.radeja.statistic.BytesHistogram;
 import pl.pw.radeja.weka.WekaPrinter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class FinePithExtractor {
 
@@ -30,16 +31,18 @@ public class FinePithExtractor {
         boolean calculateAllowPlaces = true;
         boolean decodeFiles = false;
         boolean calculatePesq = false;
-        boolean printWekaFile = true;
+        boolean printWekaFile = false;
         boolean printCalculatedThresholds = false;
+        boolean printHistogram = true;
+
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         // calculate allow places
-        Pair<List<AllowPlaces>, List<PitchCollector>> result = new Pair<>(new ArrayList<>(), new ArrayList<>());
+        List<Triplet<AllowPlaces, PitchCollector, BitsCollector>> result = new ArrayList<>();
         if (calculateAllowPlaces) {
             result = calculateAllowPlaces(getSamples(), getThresholds());
-            AllowPlacesPrint.print(result.getValue0());
+            AllowPlacesPrint.print(result.stream().map(Triplet::getValue0).collect(Collectors.toList()));
         }
 
         // decoding
@@ -61,7 +64,7 @@ public class FinePithExtractor {
 
         //print pitchValues
         if (calculateAllowPlaces) {
-            result.getValue1().forEach(pitchCollector -> {
+            result.stream().map(Triplet::getValue1).collect(Collectors.toList()).forEach(pitchCollector -> {
                 try {
                     PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch-" + pitchCollector.getThreshold() + ".txt", "UTF-8");
                     PitchCollectorPrint.print(pitchCollector.getPitchValues(), printWriter, false).close();
@@ -72,18 +75,22 @@ public class FinePithExtractor {
             });
         }
         if (printWekaFile) {
-            WekaPrinter.print(result.getValue1(), 1);
+            WekaPrinter.print(result.stream().map(Triplet::getValue1).collect(Collectors.toList()), 1);
         }
 
         //print results
         if (calculateAllowPlaces) {
-            AllowPlacesPrint.print(result.getValue0());
+            AllowPlacesPrint.print(result.stream().map(Triplet::getValue0).collect(Collectors.toList()));
         }
         if (calculatePesq) {
             PesqResultPrinter.print(pesqResults);
         }
         if (printCalculatedThresholds) {
-            CalculatedThresholdPrinter.print(result.getValue1());
+            CalculatedThresholdPrinter.print(result.stream().map(Triplet::getValue1).collect(Collectors.toList()));
+        }
+
+        if (printHistogram) {
+            result.stream().map(Triplet::getValue2).forEach(v -> BytesHistogram.printHistogram(v.getBitsToSave()));
         }
 
         stopWatch.stop();
@@ -118,10 +125,10 @@ public class FinePithExtractor {
     private static List<String> getSamples() {
         final String baseMalePath = "D:/PracaMgr/master-thesis/TIMIT_M/";
         final String baseFemalePath = "D:/PracaMgr/master-thesis/TIMIT_F/";
-//        final int maleLimit = 2;
-        final int maleLimit = 25;
-//        final int femaleLimit = 1;
-        final int femaleLimit = 25;
+        final int maleLimit = 2;
+//        final int maleLimit = 25;
+        final int femaleLimit = 1;
+//        final int femaleLimit = 25;
         List<String> samples = new ArrayList<>();
         for (int i = 1; i < maleLimit; i++) {
             samples.add(baseMalePath + i);
@@ -133,35 +140,33 @@ public class FinePithExtractor {
     }
 
     static List<Integer> getThresholds() {
-        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
-//        return Arrays.asList(0);
+//        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
+        return Arrays.asList(0);
     }
 
-    private static Pair<List<AllowPlaces>, List<PitchCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
-        List<AllowPlaces> allowPlaces = Collections.synchronizedList(new ArrayList<>());
-        List<PitchCollector> pitchCollectors = Collections.synchronizedList(new ArrayList<>());
+    private static List<Triplet<AllowPlaces, PitchCollector, BitsCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
+        List<Triplet<AllowPlaces, PitchCollector, BitsCollector>> result = Collections.synchronizedList(new ArrayList<>());
 
         for (Integer threshold : thresholds) {
             ExecutorService es = Executors.newCachedThreadPool();
             paths.forEach(path ->
-                    es.execute(() -> {
-//                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstLast(1, threshold, path));
+                            es.execute(() -> {
+                                @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstLast(1, threshold, path));
 //                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(1, threshold, path));
-                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(1, threshold, path));
-                        try {
-                            encoder.encode();
-                            HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
-                            synchronized (allowPlaces) {
-                                System.out.println("Encoded:\t" + path + "\t" + threshold + "\t" + hideF0Encoder.getNumberOfHiddenPositions());
-                                allowPlaces.add(new AllowPlaces(path, threshold, hideF0Encoder.getNumberOfHiddenPositions()));
-                            }
-                            synchronized (pitchCollectors) {
-                                pitchCollectors.add(hideF0Encoder.getPitchCollector());
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    })
+//                        @NotNull JSpeexEnc encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(1, threshold, path));
+                                try {
+                                    BitsCollector bitsCollector = encoder.encode();
+                                    HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
+                                    synchronized (result) {
+                                        System.out.println("Encoded:\t" + path + "\t" + threshold + "\t" + hideF0Encoder.getNumberOfHiddenPositions());
+                                        result.add(new Triplet<>(new AllowPlaces(path, threshold, hideF0Encoder.getNumberOfHiddenPositions()),
+                                                hideF0Encoder.getPitchCollector(),
+                                                bitsCollector));
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            })
             );
             es.shutdown();
             boolean finished = es.awaitTermination(24, TimeUnit.HOURS);
@@ -169,7 +174,7 @@ public class FinePithExtractor {
                 throw new Error("Some Error");
             }
         }
-        return new Pair<>(allowPlaces, pitchCollectors);
+        return result;
     }
 
     private static void runDecoding(List<String> paths) throws IOException {
