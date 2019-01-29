@@ -1,4 +1,4 @@
-package pl.pw.radeja.weka;
+package pl.pw.radeja.weka.printers;
 
 import org.apache.commons.math3.complex.Complex;
 import org.jtransforms.fft.DoubleFFT_1D;

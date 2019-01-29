@@ -1,8 +1,6 @@
 import org.apache.commons.lang3.time.StopWatch;
-import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
-import org.xiph.speex.Bits;
 import pl.pw.radeja.*;
 import pl.pw.radeja.pesq.PesqResultPrinter;
 import pl.pw.radeja.pesq.PesqRunner;
@@ -11,8 +9,9 @@ import pl.pw.radeja.pesq.common.PesqResult;
 import pl.pw.radeja.pitch.collectors.CalculatedThresholdPrinter;
 import pl.pw.radeja.pitch.collectors.PitchCollector;
 import pl.pw.radeja.pitch.collectors.PitchCollectorPrint;
-import pl.pw.radeja.statistic.BytesHistogram;
-import pl.pw.radeja.weka.WekaPrinter;
+import pl.pw.radeja.statistic.BytesHistogramPrinter;
+import pl.pw.radeja.weka.printers.WekaPrinter;
+import pl.pw.radeja.weka.printers.WekaVectorPrinter;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,8 +31,9 @@ public class FinePithExtractor {
         boolean decodeFiles = false;
         boolean calculatePesq = false;
         boolean printWekaFile = false;
+        boolean printWekaVectorFile = true;
         boolean printCalculatedThresholds = false;
-        boolean printHistogram = true;
+        boolean printHistogram = false;
 
 
         StopWatch stopWatch = new StopWatch();
@@ -77,6 +77,9 @@ public class FinePithExtractor {
         if (printWekaFile) {
             WekaPrinter.print(result.stream().map(Triplet::getValue1).collect(Collectors.toList()), 1);
         }
+        if (printWekaVectorFile) {
+            WekaVectorPrinter.print(result.stream().map(Triplet::getValue1).collect(Collectors.toList()), 10);
+        }
 
         //print results
         if (calculateAllowPlaces) {
@@ -90,7 +93,7 @@ public class FinePithExtractor {
         }
 
         if (printHistogram) {
-            result.stream().map(Triplet::getValue2).forEach(v -> BytesHistogram.printHistogram(v.getBitsToSave()));
+            BytesHistogramPrinter.printHistograms(result.stream().map(Triplet::getValue2).collect(Collectors.toList()));
         }
 
         stopWatch.stop();
@@ -140,8 +143,8 @@ public class FinePithExtractor {
     }
 
     static List<Integer> getThresholds() {
-//        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
-        return Arrays.asList(0);
+        return Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
+//        return Arrays.asList(60);
     }
 
     private static List<Triplet<AllowPlaces, PitchCollector, BitsCollector>> calculateAllowPlaces(List<String> paths, List<Integer> thresholds) throws InterruptedException {
@@ -158,6 +161,8 @@ public class FinePithExtractor {
                                     BitsCollector bitsCollector = encoder.encode();
                                     HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
                                     synchronized (result) {
+                                        bitsCollector.setPath(hideF0Encoder.getPitchCollector().getPath());
+                                        bitsCollector.setThreshold(hideF0Encoder.getPitchCollector().getThreshold());
                                         System.out.println("Encoded:\t" + path + "\t" + threshold + "\t" + hideF0Encoder.getNumberOfHiddenPositions());
                                         result.add(new Triplet<>(new AllowPlaces(path, threshold, hideF0Encoder.getNumberOfHiddenPositions()),
                                                 hideF0Encoder.getPitchCollector(),
