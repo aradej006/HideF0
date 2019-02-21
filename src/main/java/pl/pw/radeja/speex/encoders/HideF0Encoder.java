@@ -1,12 +1,16 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.encoders;
 
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.Bits;
-import pl.pw.radeja.pitch.changers.PitchChanger;
-import pl.pw.radeja.pitch.collectors.PitchCollector;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.encoders.config.HideF0SpeexConfig;
+import pl.pw.radeja.speex.result.SpeexBitsName;
+import pl.pw.radeja.speex.result.SpeexBits;
+import pl.pw.radeja.speex.pitch.changers.PitchChanger;
+import pl.pw.radeja.speex.pitch.collectors.PitchCollector;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +50,7 @@ public abstract class HideF0Encoder {
         Map<Integer, List<SpeexBits>> chunks = new HashMap<>();
         List<SpeexBits> chunk = new ArrayList<>();
         for (int i = 0; i < bitsCollector.getBitsToSave().size(); i++) {
-            if (!bitsCollector.getBitsToSave().get(i).getNamesOfBits().equals(NamesOfBits.SIZE)) {
+            if (!bitsCollector.getBitsToSave().get(i).getSpeexBitsName().equals(SpeexBitsName.SIZE)) {
                 chunk.add(bitsCollector.getBitsToSave().get(i));
             } else {
                 chunks.put(bitsCollector.getBitsToSave().get(i).getNumberOfBits(), chunk);
@@ -72,7 +76,7 @@ public abstract class HideF0Encoder {
     protected List<Pair<Integer, SpeexBits>> getPitches(List<SpeexBits> chunk) {
         List<Pair<Integer, SpeexBits>> pitch = new ArrayList<>();
         for (int i = 0; i < chunk.size(); i++) {
-            if (chunk.get(i).getNamesOfBits().equals(NamesOfBits.PITCH)) {
+            if (chunk.get(i).getSpeexBitsName().equals(SpeexBitsName.PITCH)) {
                 pitch.add(new Pair<>(i, chunk.get(i)));
             }
         }
@@ -97,14 +101,14 @@ public abstract class HideF0Encoder {
                 chunk.set(pair.getValue0(), pair.getValue1().setBitsData(newPitches.get(i)));
             }
         }
-        pitchCollector.addPitch(chunk.stream().filter(b -> b.getNamesOfBits().equals(NamesOfBits.PITCH)).map(SpeexBits::getBitsData).collect(Collectors.toList()), changed, calculatedThreshold, calculatedThresholdAfterHideF0);
+        pitchCollector.addPitch(chunk.stream().filter(b -> b.getSpeexBitsName().equals(SpeexBitsName.PITCH)).map(SpeexBits::getBitsData).collect(Collectors.toList()), changed, calculatedThreshold, calculatedThresholdAfterHideF0);
         return chunk;
     }
 
-    protected void printPitchValue(String prefix, List<Triplet<NamesOfBits, Integer, Integer>> bits) {
+    protected void printPitchValue(String prefix, List<Triplet<SpeexBitsName, Integer, Integer>> bits) {
         if (logLevel >= 1) {
             System.out.println(prefix + ": " +
-                    bits.stream().filter(b -> b.getValue0().equals(NamesOfBits.PITCH))
+                    bits.stream().filter(b -> b.getValue0().equals(SpeexBitsName.PITCH))
                             .map(Triplet::getValue1)
                             .map(Objects::toString)
                             .collect(Collectors.joining(";"))

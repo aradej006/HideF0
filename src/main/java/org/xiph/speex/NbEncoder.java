@@ -68,13 +68,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.NamesOfBits;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
-import java.util.stream.Collectors;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.result.SpeexBitsName;
 
 /**
  * Narrowband Speex Encoder
@@ -506,11 +501,11 @@ public class NbEncoder
 
         /* First, transmit a zero for narrowband */
         bits.pack(0, 1);
-        bitsCollector.addBits(NamesOfBits.NARROWBAND, 0, 1);
+        bitsCollector.addBits(SpeexBitsName.NARROWBAND, 0, 1);
 
         /* Transmit the sub-mode we use for this frame */
         bits.pack(submodeID, NB_SUBMODE_BITS);
-        bitsCollector.addBits(NamesOfBits.SUBMODE, submodeID, NB_SUBMODE_BITS);
+        bitsCollector.addBits(SpeexBitsName.SUBMODE, submodeID, NB_SUBMODE_BITS);
 
         /* If null mode (no transmission), just set a couple things to zero*/
         if (submodes[submodeID] == null) {
@@ -550,7 +545,7 @@ public class NbEncoder
         /*If we use low bit-rate pitch mode, transmit open-loop pitch*/
         if (submodes[submodeID].lbr_pitch != -1) {
             bits.pack(ol_pitch - min_pitch, 7);
-            bitsCollector.addBits(NamesOfBits.OPEN_LOOP, ol_pitch - min_pitch, 7);
+            bitsCollector.addBits(SpeexBitsName.OPEN_LOOP, ol_pitch - min_pitch, 7);
         }
 
         if (submodes[submodeID].forced_pitch_gain != 0) {
@@ -561,7 +556,7 @@ public class NbEncoder
             if (quant < 0)
                 quant = 0;
             bits.pack(quant, 4);
-            bitsCollector.addBits(NamesOfBits.OPEN_LOOP, quant, 4);
+            bitsCollector.addBits(SpeexBitsName.OPEN_LOOP, quant, 4);
             ol_pitch_coef = 0.066667f * quant;
         }
 
@@ -574,7 +569,7 @@ public class NbEncoder
                 qe = 31;
             ol_gain = (float) Math.exp(qe / 3.5);
             bits.pack(qe, 5);
-            bitsCollector.addBits(NamesOfBits.OPEN_LOOP, qe, 5);
+            bitsCollector.addBits(SpeexBitsName.OPEN_LOOP, qe, 5);
         }
 
         /* Special case for first frame */
@@ -754,12 +749,12 @@ public class NbEncoder
                     if (submodes[submodeID].have_subframe_gain == 3) {
                         qe = VQ.index(ener, exc_gain_quant_scal3, 8);
                         bits.pack(qe, 3);
-                        bitsCollector.addBits(NamesOfBits.GAIN_CORRECTION, qe, 3);
+                        bitsCollector.addBits(SpeexBitsName.GAIN_CORRECTION, qe, 3);
                         ener = exc_gain_quant_scal3[qe];
                     } else {
                         qe = VQ.index(ener, exc_gain_quant_scal1, 2);
                         bits.pack(qe, 1);
-                        bitsCollector.addBits(NamesOfBits.GAIN_CORRECTION, qe, 1);
+                        bitsCollector.addBits(SpeexBitsName.GAIN_CORRECTION, qe, 1);
                         ener = exc_gain_quant_scal1[qe];
                     }
                     ener = (float) Math.exp(ener);
@@ -837,10 +832,10 @@ public class NbEncoder
         if (submodeID == 1) {
             if (dtx_count != 0) {
                 bits.pack(15, 4);
-                bitsCollector.addBits(NamesOfBits.NB_LSP_INTERPOLATION, 15, 4);
+                bitsCollector.addBits(SpeexBitsName.NB_LSP_INTERPOLATION, 15, 4);
             } else {
                 bits.pack(0, 4);
-                bitsCollector.addBits(NamesOfBits.NB_LSP_INTERPOLATION, 0, 4);
+                bitsCollector.addBits(SpeexBitsName.NB_LSP_INTERPOLATION, 0, 4);
             }
         }
 

@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch.changers;
+package pl.pw.radeja.speex.pitch.changers;
 
 import java.util.List;
 

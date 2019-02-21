@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch.collectors;
+package pl.pw.radeja.speex.pitch.collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -148,7 +148,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>JSpeexEnc</mainClass>
+                            <mainClass>pl.pw.radeja.JSpeexEnc</mainClass>
                             <packageName>org.xiph.speex</packageName>
                         </manifest>
                         <manifestEntries>

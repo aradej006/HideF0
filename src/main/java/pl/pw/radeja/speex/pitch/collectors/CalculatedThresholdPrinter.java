@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch.collectors;
+package pl.pw.radeja.speex.pitch.collectors;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,7 +56,7 @@ public class CalculatedThresholdPrinter {
 
     private static Integer countThresholdFromLinear(PitchCollector collector, List<Integer> thresholds) {
         Integer min = thresholds.indexOf(collector.getThreshold()) > 0 ? thresholds.get(thresholds.indexOf(collector.getThreshold()) - 1) : 0;
-        return (int) collector.getPitchValues().stream().filter(p -> {
+        return (int) collector.getFramePitchValues().stream().filter(p -> {
             if (collector.getThreshold() != 0) {
                 return p.getCalculatedThreshold() <= collector.getThreshold() && p.getCalculatedThreshold() > min;
             } else {
@@ -67,7 +67,7 @@ public class CalculatedThresholdPrinter {
 
     private static Integer countThresholdAfterHideF0FromLinear(PitchCollector collector, List<Integer> thresholds) {
         Integer min = thresholds.indexOf(collector.getThreshold()) > 0 ? thresholds.get(thresholds.indexOf(collector.getThreshold()) - 1) : 0;
-        return (int) collector.getPitchValues().stream().filter(p -> {
+        return (int) collector.getFramePitchValues().stream().filter(p -> {
             if (collector.getThreshold() != 0) {
                 if (p.isChanged()) {
                     return p.getCalculatedThresholdAfterHideF0() <= collector.getThreshold() && p.getCalculatedThresholdAfterHideF0() > min;

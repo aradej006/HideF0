@@ -68,11 +68,11 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.speex.result.BitsCollector;
 
 /**
  * Speex Encoder interface, used as a base for the Narrowband and sideband
- * encoders.
+ * speex.
  *
  * @author Marc Gimpel, Wimba S.A. (mgimpel@horizonwimba.com)
  * @version $Revision$

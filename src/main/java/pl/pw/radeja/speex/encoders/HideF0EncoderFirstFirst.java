@@ -1,9 +1,9 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.encoders;
 
 import org.javatuples.Pair;
-import org.javatuples.Triplet;
-import pl.pw.radeja.pitch.changers.LinearApproximateChanger;
-import pl.pw.radeja.pitch.changers.PitchChanger;
+import pl.pw.radeja.speex.result.SpeexBits;
+import pl.pw.radeja.speex.pitch.changers.LinearApproximateChanger;
+import pl.pw.radeja.speex.pitch.changers.PitchChanger;
 
 import java.util.*;
 

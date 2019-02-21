@@ -1,4 +1,4 @@
-/******************************************************************************
+package pl.pw.radeja; /******************************************************************************
  *                                                                            *
  * Copyright (c) 1999-2003 Wimba S.A., All Rights Reserved.                   *
  *                                                                            *
@@ -24,7 +24,7 @@
  *      Wimba S.A. is not liable for any consequence related to the           *
  *      use of the provided software.                                         *
  *                                                                            *
- * Class: JSpeexDec.java                                                      *
+ * Class: pl.pw.radeja.JSpeexDec.java                                                      *
  *                                                                            *
  * Author: James LAWRENCE                                                     *
  * Modified by: Marc GIMPEL                                                   *
@@ -66,6 +66,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.xiph.speex.*;
@@ -119,6 +120,7 @@ public class JSpeexDec {
     /**
      * Print level for messages
      */
+    @Setter
     protected int printlevel = INFO;
 
     /**
@@ -136,10 +138,12 @@ public class JSpeexDec {
     /**
      * Defines File format for input audio file (Raw, Ogg or Wave).
      */
+    @Setter
     protected int srcFormat = FILE_FORMAT_OGG;
     /**
      * Defines File format for output audio file (Raw or Wave).
      */
+    @Setter
     protected int destFormat = FILE_FORMAT_WAVE;
 
     /**
@@ -155,6 +159,7 @@ public class JSpeexDec {
     /**
      * Defines whether or not the perceptual enhancement is used.
      */
+    @Setter
     protected boolean enhanced = true;
     /**
      * If input is raw, defines the decoder mode (0=NB, 1=WB and 2-UWB).
@@ -188,10 +193,12 @@ public class JSpeexDec {
     /**
      * The audio input file
      */
+    @Setter
     protected String srcFile;
     /**
      * The audio output file
      */
+    @Setter
     protected String destFile;
 
     /**
@@ -203,7 +210,7 @@ public class JSpeexDec {
     /**
      * Command line entrance:
      * <pre>
-     * Usage: JSpeexDec [options] input_file output_file
+     * Usage: pl.pw.radeja.JSpeexDec [options] input_file output_file
      * </pre>
      *
      * @param args Command line parameters.
@@ -330,7 +337,7 @@ public class JSpeexDec {
      */
     public static void usage() {
         version();
-        System.out.println("Usage: JSpeexDec [options] input_file output_file");
+        System.out.println("Usage: pl.pw.radeja.JSpeexDec [options] input_file output_file");
         System.out.println("Where:");
         System.out.println("  input_file can be:");
         System.out.println("    filename.spx  an Ogg Speex file");

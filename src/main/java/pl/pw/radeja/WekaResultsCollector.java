@@ -1,14 +1,11 @@
+package pl.pw.radeja;
+
 import org.apache.commons.lang3.time.StopWatch;
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.weka.WekaResult;
 import pl.pw.radeja.weka.WekaResultPrinter;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.classifiers.functions.Logistic;
-import weka.classifiers.functions.MultilayerPerceptron;
-import weka.classifiers.functions.SMO;
-import weka.classifiers.meta.AdaBoostM1;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
@@ -26,19 +23,24 @@ public class WekaResultsCollector {
     static String testExt = "-1-test.arff";
 
     public static void main(@NotNull final String[] args) throws InterruptedException {
-        List<Integer> thresholds = FinePithExtractor.getThresholds();
         Map<String, List<WekaResult>> resultsMap = new HashMap<>();
-//        String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
-//        resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
-//        String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
-//        resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
-        String pathFLRand = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
-        resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
+        if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstLast)) {
+            String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
+            resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstFirst)) {
+            String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
+            resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstLastRand)) {
+            String pathFLRand = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
+            resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
+        } else {
+            throw new Error("Add new path to Weka files to your new HideF0 variant: " + Config.HIDE_F0_TYPE.toString());
+        }
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         ExecutorService es = Executors.newCachedThreadPool();
-        thresholds.forEach(th -> es.execute(() -> resultsMap.keySet().forEach(path -> {
+        Config.THRESHOLDS.forEach(th -> es.execute(() -> resultsMap.keySet().forEach(path -> {
             try {
                 runMachineLearning(path + th, resultsMap.get(path));
             } catch (InterruptedException e) {
@@ -74,7 +76,7 @@ public class WekaResultsCollector {
 
     private static void runMachineLearning(String path, List<WekaResult> results) throws InterruptedException {
         List<Classifier> cls = getClassifiers();
-        ExecutorService es = Executors.newCachedThreadPool();
+        ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
 
         cls.forEach(classifier -> es.execute(() -> {
             try {

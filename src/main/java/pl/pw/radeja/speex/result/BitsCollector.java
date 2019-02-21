@@ -1,4 +1,4 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.result;
 
 
 import lombok.Getter;
@@ -17,12 +17,12 @@ public final class BitsCollector {
     private Integer threshold;
     private List<SpeexBits> bitsToSave = new ArrayList<>();
 
-    public boolean addBits(NamesOfBits name, int data, int nbBits) {
+    public boolean addBits(SpeexBitsName name, int data, int nbBits) {
         return bitsToSave.add(new SpeexBits(name, data, nbBits));
     }
 
     public boolean addSize(int size) {
-        return bitsToSave.add(new SpeexBits(NamesOfBits.SIZE, size, getBitsToSaveByName(NamesOfBits.SIZE).size() + 1));
+        return bitsToSave.add(new SpeexBits(SpeexBitsName.SIZE, size, getBitsToSaveByName(SpeexBitsName.SIZE).size() + 1));
     }
 
     public void save(@NotNull Bits bits) {
@@ -33,8 +33,8 @@ public final class BitsCollector {
         return bitsToSave;
     }
 
-    public List<SpeexBits> getBitsToSaveByName(NamesOfBits name) {
-        return bitsToSave.stream().filter(o -> o.getNamesOfBits().equals(name)).collect(Collectors.toList());
+    public List<SpeexBits> getBitsToSaveByName(SpeexBitsName name) {
+        return bitsToSave.stream().filter(o -> o.getSpeexBitsName().equals(name)).collect(Collectors.toList());
     }
 
     public String getSampleName() {

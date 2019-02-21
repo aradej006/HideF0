@@ -69,8 +69,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.NamesOfBits;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.result.SpeexBitsName;
 
 /**
  * LSP Quantisation and Unquantisation (high)
@@ -115,13 +115,13 @@ public class HighLspQuant
             qlsp[i] *= 256;
         id = lsp_quant(qlsp, 0, high_lsp_cdbk, 64, order);
         bits.pack(id, 6);
-        bitsCollector.addBits(NamesOfBits.HIGH_LSP_QUANT, id, 6);
+        bitsCollector.addBits(SpeexBitsName.HIGH_LSP_QUANT, id, 6);
 
         for (i = 0; i < order; i++)
             qlsp[i] *= 2;
         id = lsp_weight_quant(qlsp, 0, quant_weight, 0, high_lsp_cdbk2, 64, order);
         bits.pack(id, 6);
-        bitsCollector.addBits(NamesOfBits.HIGH_LSP_QUANT, id, 6);
+        bitsCollector.addBits(SpeexBitsName.HIGH_LSP_QUANT, id, 6);
 
         for (i = 0; i < order; i++)
             qlsp[i] *= 0.0019531f;

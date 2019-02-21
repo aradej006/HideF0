@@ -39,8 +39,9 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.WaveToolbox;
-import pl.pw.radeja.HideF0EncoderFirstLast;
-import pl.pw.radeja.pitch.changers.NonPitchChanger;
+import pl.pw.radeja.JSpeexDec;
+import pl.pw.radeja.JSpeexEnc;
+import pl.pw.radeja.speex.encoders.HideF0EncoderFirstLast;
 
 import java.io.File;
 import java.io.IOException;
@@ -403,21 +404,21 @@ public class TestJSpeexCodec
                                             final int channels,
                                             final boolean vbr) {
         @NotNull JSpeexEnc enc = new JSpeexEnc(new HideF0EncoderFirstLast(1, 0, "dump"));
-        enc.srcFile = filename + ".wav";
-        enc.destFile = filename + ".spx";
-        enc.srcFormat = JSpeexEnc.FILE_FORMAT_WAVE;
-        enc.destFormat = JSpeexEnc.FILE_FORMAT_OGG;
-        enc.printlevel = JSpeexEnc.ERROR;
-        enc.mode = mode; // Narrowband
+        enc.setSrcFile(filename + ".wav");
+        enc.setDestFile(filename + ".spx");
+        enc.setSrcFormat(JSpeexEnc.FILE_FORMAT_WAVE);
+        enc.setDestFormat(JSpeexEnc.FILE_FORMAT_OGG);
+        enc.setPrintlevel(JSpeexEnc.ERROR);
+        enc.setMode(mode); // Narrowband
         //enc.vbr_quality = 8f; // default 8
         //enc.quality = 8;      // default 8
         //enc.complexity = 3;   // default 3
         //enc.nframes = 1;      // default 1
-        enc.vbr = vbr;        // default false
+        enc.setVbr(vbr);        // default false
         //enc.vad = false;      // default false
         //enc.dtx = false;      // default false
-        enc.sampleRate = sampleRate;
-        enc.channels = channels;
+        enc.setSampleRate(sampleRate);
+        enc.setChannels(channels);
         return enc;
     }
 
@@ -430,12 +431,12 @@ public class TestJSpeexCodec
     @NotNull
     protected static JSpeexDec buildDecoder(final String filename) {
         @NotNull JSpeexDec dec = new JSpeexDec();
-        dec.srcFile = filename + ".spx";
-        dec.destFile = filename + "-encdec.wav";
-        dec.srcFormat = JSpeexDec.FILE_FORMAT_OGG;
-        dec.destFormat = JSpeexDec.FILE_FORMAT_WAVE;
-        dec.printlevel = JSpeexDec.ERROR;
-        dec.enhanced = true;
+        dec.setSrcFile(filename + ".spx");
+        dec.setDestFile(filename + "-encdec.wav");
+        dec.setSrcFormat(JSpeexDec.FILE_FORMAT_OGG);
+        dec.setDestFormat(JSpeexDec.FILE_FORMAT_WAVE);
+        dec.setPrintlevel(JSpeexDec.ERROR);
+        dec.setEnhanced(true);
         return dec;
     }
 }

@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch.collectors;
+package pl.pw.radeja.speex.pitch.collectors;
 
 
 import java.util.ArrayList;
@@ -8,22 +8,22 @@ import java.util.List;
 public class PitchCollector {
     private String path;
     private Integer threshold;
-    private List<PitchValue> pitchValues;
+    private List<PitchValue> framePitchValues;
     private int numberOfFrame = -1;
 
     public PitchCollector(String path, Integer threshold) {
         this.path = path;
         this.threshold = threshold;
-        pitchValues = Collections.synchronizedList(new ArrayList<>());
+        framePitchValues = Collections.synchronizedList(new ArrayList<>());
     }
 
     public boolean addPitch(List<Integer> pitchValues, boolean changed, Integer calculatedThreshold, Integer calculatedThresholdAfterHideF0) {
         numberOfFrame++;
-        return this.pitchValues.add(new PitchValue(numberOfFrame, pitchValues, changed, calculatedThreshold, calculatedThresholdAfterHideF0));
+        return this.framePitchValues.add(new PitchValue(numberOfFrame, pitchValues, changed, calculatedThreshold, calculatedThresholdAfterHideF0));
     }
 
-    public List<PitchValue> getPitchValues() {
-        return pitchValues;
+    public List<PitchValue> getFramePitchValues() {
+        return framePitchValues;
     }
 
     public String getPath() {

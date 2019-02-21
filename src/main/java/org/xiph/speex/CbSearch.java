@@ -68,7 +68,7 @@
 
 package org.xiph.speex;
 
-import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.speex.result.BitsCollector;
 
 /**
  * Abstract class that is the base for the various Codebook search methods.

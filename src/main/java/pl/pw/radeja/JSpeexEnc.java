@@ -1,4 +1,4 @@
-/******************************************************************************
+package pl.pw.radeja; /******************************************************************************
  *                                                                            *
  * Copyright (c) 1999-2003 Wimba S.A., All Rights Reserved.                   *
  *                                                                            *
@@ -24,7 +24,7 @@
  *      Wimba S.A. is not liable for any consequence related to the           *
  *      use of the provided software.                                         *
  *                                                                            *
- * Class: JSpeexEnc.java                                                      *
+ * Class: pl.pw.radeja.JSpeexEnc.java                                                      *
  *                                                                            *
  * Author: Marc GIMPEL                                                        *
  * Based on code by: Jean-Marc VALIN                                          *
@@ -65,11 +65,12 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.*;
-import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.HideF0Encoder;
-import pl.pw.radeja.HideF0EncoderFirstLast;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.encoders.HideF0Encoder;
+import pl.pw.radeja.speex.encoders.HideF0EncoderFirstLast;
 
 import java.io.*;
 
@@ -110,6 +111,7 @@ public class JSpeexEnc {
     /**
      * Print level for messages
      */
+    @Setter
     protected int printlevel = INFO;
 
     /**
@@ -127,22 +129,25 @@ public class JSpeexEnc {
     /**
      * Defines File format for input audio file (Raw, Ogg or Wave).
      */
+    @Setter
     protected int srcFormat = FILE_FORMAT_OGG;
     /**
      * Defines File format for output audio file (Raw or Wave).
      */
+    @Setter
     protected int destFormat = FILE_FORMAT_WAVE;
 
     /**
      * Defines the encoder mode (0=NB, 1=WB and 2=UWB).
      */
+    @Setter
     protected int mode = -1;
     /**
      * Defines the encoder quality setting (integer from 0 to 10).
      */
     protected int quality = 8;
     /**
-     * Defines the encoders algorithmic complexity.
+     * Defines the speex algorithmic complexity.
      */
     protected int complexity = 3;
     /**
@@ -156,10 +161,12 @@ public class JSpeexEnc {
     /**
      * Defines the sampling rate of the audio input.
      */
+    @Setter
     protected int sampleRate = -1;
     /**
      * Defines the number of channels of the audio input (1=mono, 2=stereo).
      */
+    @Setter
     protected int channels = 1;
     /**
      * Defines the encoder VBR quality setting (float from 0 to 10).
@@ -168,6 +175,7 @@ public class JSpeexEnc {
     /**
      * Defines whether or not to use VBR (Variable Bit Rate).
      */
+    @Setter
     protected boolean vbr = false;
     /**
      * Defines whether or not to use VAD (Voice Activity Detection).
@@ -181,10 +189,12 @@ public class JSpeexEnc {
     /**
      * The audio input file
      */
+    @Setter
     protected String srcFile;
     /**
      * The audio output file
      */
+    @Setter
     protected String destFile;
 
     private HideF0Encoder hideF0Encoder;
@@ -199,7 +209,7 @@ public class JSpeexEnc {
     /**
      * Command line entrance:
      * <pre>
-     * Usage: JSpeexEnc [options] input_file output_file
+     * Usage: pl.pw.radeja.JSpeexEnc [options] input_file output_file
      * </pre>
      *
      * @param args Command line parameters.
@@ -325,7 +335,7 @@ public class JSpeexEnc {
     public static void usage() {
         version();
         System.out.println("");
-        System.out.println("Usage: JSpeexEnc [options] input_file output_file");
+        System.out.println("Usage: pl.pw.radeja.JSpeexEnc [options] input_file output_file");
         System.out.println("Where:");
         System.out.println("  input_file can be:");
         System.out.println("    filename.wav  a PCM wav file");

@@ -68,7 +68,7 @@
 
 package org.xiph.speex;
 
-import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.speex.result.BitsCollector;
 
 /**
  * Long Term Prediction Quantisation and Unquantisation (Forced Pitch)

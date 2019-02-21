@@ -69,8 +69,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.NamesOfBits;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.result.SpeexBitsName;
 
 /**
  * Long Term Prediction Quantisation and Unquantisation (3Tap)
@@ -138,9 +138,9 @@ public class Ltp3Tap
 
         if (N == 0 || end < start) {
             bits.pack(0, pitch_bits);
-            bitsCollector.addBits(NamesOfBits.PITCH, 0, pitch_bits);
+            bitsCollector.addBits(SpeexBitsName.PITCH, 0, pitch_bits);
             bits.pack(0, gain_bits);
-            bitsCollector.addBits(NamesOfBits.PITCH_BEST_GAIN, 0, gain_bits);
+            bitsCollector.addBits(SpeexBitsName.PITCH_BEST_GAIN, 0, gain_bits);
             for (i = 0; i < nsf; i++)
                 exc[es + i] = 0;
             return start;
@@ -169,9 +169,9 @@ public class Ltp3Tap
         int pitchValue = best_pitch - start;
 
         bits.pack(pitchValue, pitch_bits);
-        bitsCollector.addBits(NamesOfBits.PITCH, pitchValue, pitch_bits);
+        bitsCollector.addBits(SpeexBitsName.PITCH, pitchValue, pitch_bits);
         bits.pack(best_gain_index, gain_bits);
-        bitsCollector.addBits(NamesOfBits.PITCH_BEST_GAIN, best_gain_index, gain_bits);
+        bitsCollector.addBits(SpeexBitsName.PITCH_BEST_GAIN, best_gain_index, gain_bits);
         for (i = 0; i < nsf; i++)
             exc[es + i] = best_exc[i];
 

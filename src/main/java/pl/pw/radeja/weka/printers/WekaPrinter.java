@@ -2,8 +2,8 @@ package pl.pw.radeja.weka.printers;
 
 import org.apache.commons.math3.complex.Complex;
 import org.jtransforms.fft.DoubleFFT_1D;
-import pl.pw.radeja.pitch.collectors.PitchCollector;
-import pl.pw.radeja.pitch.collectors.PitchValue;
+import pl.pw.radeja.speex.pitch.collectors.PitchCollector;
+import pl.pw.radeja.speex.pitch.collectors.PitchValue;
 
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -44,7 +44,7 @@ public final class WekaPrinter {
                         .stream()
                         .filter(filter)
                         .forEach(pitchCollector ->
-                                partition(pitchCollector.getPitchValues(), numberOfFrames)
+                                partition(pitchCollector.getFramePitchValues(), numberOfFrames)
                                         .stream()
                                         .filter(p -> p.size() == numberOfFrames)
                                         .forEach(p -> {

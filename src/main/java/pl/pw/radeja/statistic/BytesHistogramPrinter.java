@@ -1,6 +1,6 @@
 package pl.pw.radeja.statistic;
 
-import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.speex.result.BitsCollector;
 
 import java.util.ArrayList;
 import java.util.Collections;

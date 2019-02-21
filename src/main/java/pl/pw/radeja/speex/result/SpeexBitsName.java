@@ -1,6 +1,6 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.result;
 
-public enum NamesOfBits {
+public enum SpeexBitsName {
     NARROWBAND,
     SUBMODE,
     PITCH,

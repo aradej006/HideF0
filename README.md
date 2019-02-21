@@ -13,12 +13,12 @@ It has been tested and works with the jlGui Java Music Player.
 
 Running on the Command line
 ---------------------------
-encoder help: java -cp dist/jspeex.jar JSpeexEnc -h
+encoder help: java -cp dist/jspeex.jar pl.pw.radeja.JSpeexEnc -h
 or: java -jar dist/jspeex.jar -h
-decoder help: java -cp dist/jspeex.jar JSpeexDec -h
+decoder help: java -cp dist/jspeex.jar pl.pw.radeja.JSpeexDec -h
 ex:
-encoding a wav file: java -cp dist/jspeex.jar JSpeexEnc input.wav output.spx
-decoding any speex file: java -cp dist/jspeex.jar JSpeexDec input.spx output.wav
+encoding a wav file: java -cp dist/jspeex.jar pl.pw.radeja.JSpeexEnc input.wav output.spx
+decoding any speex file: java -cp dist/jspeex.jar pl.pw.radeja.JSpeexDec input.spx output.wav
 
 Credits
 -------

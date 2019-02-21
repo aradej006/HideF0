@@ -1,4 +1,4 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.result;
 
 import java.util.*;
 

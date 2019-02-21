@@ -69,7 +69,7 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.BitsCollector;
+import pl.pw.radeja.speex.result.BitsCollector;
 
 /**
  * Noise codebook search

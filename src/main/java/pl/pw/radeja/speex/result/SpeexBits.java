@@ -1,4 +1,4 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.ToString;
 @Getter
 @ToString
 public class SpeexBits {
-    private NamesOfBits namesOfBits;
+    private SpeexBitsName speexBitsName;
     private int bitsData;
     private int numberOfBits;
 

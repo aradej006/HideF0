@@ -1,4 +1,4 @@
-package pl.pw.radeja;
+package pl.pw.radeja.speex.encoders.config;
 
 import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.OggSpeexWriter;

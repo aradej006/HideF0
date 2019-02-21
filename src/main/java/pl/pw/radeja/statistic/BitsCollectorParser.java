@@ -1,9 +1,9 @@
 package pl.pw.radeja.statistic;
 
 
-import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.NamesOfBits;
-import pl.pw.radeja.SpeexBits;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.result.SpeexBitsName;
+import pl.pw.radeja.speex.result.SpeexBits;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +19,7 @@ class BitsCollectorParser {
     private static String buildBits(List<SpeexBits> speexBitsList) {
         StringBuilder builder = new StringBuilder();
         speexBitsList.stream()
-                .filter(v -> !v.getNamesOfBits().equals(NamesOfBits.SIZE))
+                .filter(v -> !v.getSpeexBitsName().equals(SpeexBitsName.SIZE))
                 .forEach(b -> builder.append(intToBinaryString(b.getBitsData())));
         return builder.toString();
     }

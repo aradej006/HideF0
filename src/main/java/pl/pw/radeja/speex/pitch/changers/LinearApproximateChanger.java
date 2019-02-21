@@ -1,4 +1,4 @@
-package pl.pw.radeja.pitch.changers;
+package pl.pw.radeja.speex.pitch.changers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +34,8 @@ public class LinearApproximateChanger extends PitchChanger {
         return result;
     }
 
-    protected static Integer LinearApprox(Integer first, Integer last, Integer length, Integer x) {
-        return ((last - first) / (length - 1)) * x + first;
+    public static Integer LinearApprox(Integer first, Integer last, Integer length, Integer x) {
+        return (int) Math.rint(((last * 1. - first) / (length - 1)) * x + first);
     }
 
     public boolean shouldChange(List<Integer> pitches) {

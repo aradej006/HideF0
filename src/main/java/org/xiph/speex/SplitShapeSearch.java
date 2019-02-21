@@ -69,8 +69,8 @@
 package org.xiph.speex;
 
 import org.jetbrains.annotations.NotNull;
-import pl.pw.radeja.BitsCollector;
-import pl.pw.radeja.NamesOfBits;
+import pl.pw.radeja.speex.result.BitsCollector;
+import pl.pw.radeja.speex.result.SpeexBitsName;
 
 /**
  * Split shape codebook search
@@ -321,7 +321,7 @@ public class SplitShapeSearch
         for (i = 0; i < nb_subvect; i++) {
             ind[i] = nind[0][i];
             bits.pack(ind[i], shape_bits + have_sign);
-            bitsCollector.addBits(NamesOfBits.CODE_BOOK, ind[i], shape_bits + have_sign);
+            bitsCollector.addBits(SpeexBitsName.CODE_BOOK, ind[i], shape_bits + have_sign);
         }
 
         /* Put everything back together */
