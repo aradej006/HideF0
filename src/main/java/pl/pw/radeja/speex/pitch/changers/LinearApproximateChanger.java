@@ -1,14 +1,17 @@
 package pl.pw.radeja.speex.pitch.changers;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class LinearApproximateChanger extends PitchChanger {
 
-    public LinearApproximateChanger(int logLevel, Integer threshold) {
-        super(logLevel, threshold);
+    public LinearApproximateChanger(Integer threshold) {
+        super(threshold);
     }
 
     @Override
@@ -21,16 +24,11 @@ public class LinearApproximateChanger extends PitchChanger {
         List<Integer> result = new ArrayList<>();
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
-        if (logLevel >= 2) {
-            System.out.println("A: " + pitches.stream().map(Objects::toString).collect(Collectors.joining(";")));
-        }
+        log.debug("A: " + pitches.stream().map(Objects::toString).collect(Collectors.joining(";")));
         for (int i = 0; i < 4; i++) {
             result.add(LinearApprox(first, last, pitches.size(), i));
         }
-        if (logLevel >= 2) {
-            System.out.println("B: " + result.stream().map(Objects::toString).collect(Collectors.joining(";")));
-            System.out.println("\n");
-        }
+        log.debug("B: " + result.stream().map(Objects::toString).collect(Collectors.joining(";")));
         return result;
     }
 

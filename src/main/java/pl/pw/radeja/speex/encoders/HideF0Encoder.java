@@ -1,5 +1,6 @@
 package pl.pw.radeja.speex.encoders;
 
+import lombok.extern.slf4j.Slf4j;
 import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
@@ -17,8 +18,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public abstract class HideF0Encoder {
-    protected int logLevel;
     protected String path;
     protected Integer numberOfHiddenPositions = 0;
     protected Integer hiddenPositionPerFrame = 0;
@@ -27,7 +28,6 @@ public abstract class HideF0Encoder {
 
     public HideF0Encoder(PitchChanger pitchChanger, String path) {
         this.pitchChanger = pitchChanger;
-        this.logLevel = pitchChanger.getLogLevel();
         this.path = path;
         this.pitchCollector = new PitchCollector(this.path, pitchChanger.getThreshold());
     }
@@ -40,9 +40,7 @@ public abstract class HideF0Encoder {
             List<SpeexBits> nextChunk = chunks.get(i);
             saveChunk(writer, chunk, nextChunk);
         }
-        if (logLevel >= 1) {
-            System.out.println("Number of hidden positions: " + numberOfHiddenPositions);
-        }
+        log.debug("Number of hidden positions: " + numberOfHiddenPositions);
         writer.close();
     }
 
@@ -106,15 +104,12 @@ public abstract class HideF0Encoder {
     }
 
     protected void printPitchValue(String prefix, List<Triplet<SpeexBitsName, Integer, Integer>> bits) {
-        if (logLevel >= 1) {
-            System.out.println(prefix + ": " +
-                    bits.stream().filter(b -> b.getValue0().equals(SpeexBitsName.PITCH))
-                            .map(Triplet::getValue1)
-                            .map(Objects::toString)
-                            .collect(Collectors.joining(";"))
-
-            );
-        }
+        log.debug(prefix + ": " +
+                bits.stream().filter(b -> b.getValue0().equals(SpeexBitsName.PITCH))
+                        .map(Triplet::getValue1)
+                        .map(Objects::toString)
+                        .collect(Collectors.joining(";"))
+        );
     }
 
     public Integer getNumberOfHiddenPositions() {

@@ -25,9 +25,7 @@ public final class PesqRunner {
                     while ((line = input.readLine()) != null) {
                         if (line.contains("P.862 Prediction (Raw MOS, MOS-LQO):")) {
                             String[] pesqResults = line.split(" ")[7].split("\t");
-                            synchronized (results) {
-                                results.add(new PesqResult(f, Float.parseFloat(pesqResults[0]), Float.parseFloat(pesqResults[1])));
-                            }
+                            results.add(new PesqResult(f, Float.parseFloat(pesqResults[0]), Float.parseFloat(pesqResults[1])));
                         }
                     }
                 } catch (IOException e) {

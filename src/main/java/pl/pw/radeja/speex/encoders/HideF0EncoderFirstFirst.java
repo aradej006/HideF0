@@ -9,8 +9,8 @@ import java.util.*;
 
 public class HideF0EncoderFirstFirst extends HideF0Encoder {
 
-    public HideF0EncoderFirstFirst(int logLevel, int threshold, String path) {
-        super(new LinearApproximateChanger(logLevel, threshold), path);
+    public HideF0EncoderFirstFirst(int threshold, String path) {
+        super(new LinearApproximateChanger(threshold), path);
         hiddenPositionPerFrame = 3;
     }
 

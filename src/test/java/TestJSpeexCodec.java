@@ -403,7 +403,7 @@ public class TestJSpeexCodec
                                             final int sampleRate,
                                             final int channels,
                                             final boolean vbr) {
-        @NotNull JSpeexEnc enc = new JSpeexEnc(new HideF0EncoderFirstLast(1, 0, "dump"));
+        @NotNull JSpeexEnc enc = new JSpeexEnc(new HideF0EncoderFirstLast( 0, "dump"));
         enc.setSrcFile(filename + ".wav");
         enc.setDestFile(filename + ".spx");
         enc.setSrcFormat(JSpeexEnc.FILE_FORMAT_WAVE);

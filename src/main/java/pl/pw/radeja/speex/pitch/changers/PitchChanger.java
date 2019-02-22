@@ -1,13 +1,14 @@
 package pl.pw.radeja.speex.pitch.changers;
 
+import lombok.Getter;
+
 import java.util.List;
 
+@Getter
 public abstract class PitchChanger {
-    int logLevel;
     Integer threshold;
 
-    PitchChanger(int logLevel, Integer threshold) {
-        this.logLevel = logLevel;
+    PitchChanger(Integer threshold) {
         this.threshold = threshold;
     }
 
@@ -18,12 +19,4 @@ public abstract class PitchChanger {
     public abstract Integer calculateThreshold(List<Integer> pitches);
 
     public abstract boolean isLinear(List<Integer> pitches);
-
-    public Integer getThreshold() {
-        return threshold;
-    }
-
-    public int getLogLevel() {
-        return logLevel;
-    }
 }

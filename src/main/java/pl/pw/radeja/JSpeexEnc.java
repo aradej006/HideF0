@@ -218,7 +218,7 @@ public class JSpeexEnc {
     public static void main(@NotNull final String[] args)
             throws IOException {
 
-        HideF0Encoder hideF0Encoder = new HideF0EncoderFirstLast(0,0, "dump");
+        HideF0Encoder hideF0Encoder = new HideF0EncoderFirstLast(0, "dump");
         @NotNull JSpeexEnc encoder = new JSpeexEnc(hideF0Encoder);
         if (encoder.parseArgs(args)) {
             encoder.encode();

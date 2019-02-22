@@ -4,8 +4,8 @@ import pl.pw.radeja.speex.pitch.changers.LinearApproximateRand;
 
 public class HideF0EncoderFirstFirstRand extends HideF0EncoderFirstFirst {
 
-    public HideF0EncoderFirstFirstRand(int logLevel, int threshold, String path) {
-        super(new LinearApproximateRand(logLevel, threshold, 1L), path);
+    public HideF0EncoderFirstFirstRand(int threshold, String path) {
+        super(new LinearApproximateRand(threshold, 1L), path);
         hiddenPositionPerFrame = 2;
     }
 }

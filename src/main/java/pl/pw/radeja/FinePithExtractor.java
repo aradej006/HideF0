@@ -1,5 +1,6 @@
 package pl.pw.radeja;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.StopWatch;
 import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.pesq.PesqResultPrinter;
@@ -32,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class FinePithExtractor {
 
     public static void main(@NotNull final String[] args) throws InterruptedException, IOException {
@@ -40,8 +42,7 @@ public class FinePithExtractor {
         // calculate allow places
         List<SampleResult> result = new ArrayList<>();
         if (Config.CALCULATE_ALLOW_PLACES) {
-            result = calculateAllowPlaces();
-            AllowPlacesPrint.print(result.stream().map(SampleResult::getAllowPlaces).collect(Collectors.toList()));
+            result = calculate();
         }
 
         // decoding
@@ -56,9 +57,12 @@ public class FinePithExtractor {
         List<PesqResult> pesqResults = new ArrayList<>();
         if (Config.CALCUALTE_PESQ) {
             List<PesqFiles> filesToPesq = new ArrayList<>();
-            Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToPesq.add(new PesqFiles(s + ".wav", s + "-hide-" + t + "-dec.wav"))));
+            Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToPesq.add(
+                    new PesqFiles(
+                            s + ".wav",
+                            s + "-hide-" + t + "-dec-" + Config.HIDE_F0_TYPE.toString() + ".wav"
+                    ))));
             pesqResults = PesqRunner.run(filesToPesq);
-            PesqResultPrinter.print(pesqResults);
         }
 
         //print pitchValues
@@ -95,7 +99,7 @@ public class FinePithExtractor {
         }
 
         stopWatch.stop();
-        System.out.println("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
+        log.info("Total time:" + stopWatch.toString());
     }
 
     private static JSpeexEnc getSpeexEncoder(final HideF0Encoder hideF0Encoder) {
@@ -104,7 +108,7 @@ public class FinePithExtractor {
         enc.destFile = hideF0Encoder.getPath() + "-pitch.spx";
         enc.srcFormat = JSpeexEnc.FILE_FORMAT_WAVE;
         enc.destFormat = JSpeexEnc.FILE_FORMAT_OGG;
-        enc.printlevel = JSpeexEnc.INFO;
+        enc.printlevel = JSpeexEnc.ERROR;
         enc.mode = 0;
         enc.sampleRate = 8000;
         enc.channels = 1;
@@ -115,60 +119,62 @@ public class FinePithExtractor {
     private static JSpeexDec getSpeexDecoder(final String filename) {
         @NotNull JSpeexDec dec = new JSpeexDec();
         dec.srcFile = filename + ".spx";
-        dec.destFile = filename + "-dec.wav";
+        dec.destFile = filename + "-dec-" + Config.HIDE_F0_TYPE.toString() + ".wav";
         dec.srcFormat = JSpeexDec.FILE_FORMAT_OGG;
         dec.destFormat = JSpeexDec.FILE_FORMAT_WAVE;
-        dec.printlevel = JSpeexDec.INFO;
+        dec.printlevel = JSpeexDec.ERROR;
         dec.enhanced = true;
         return dec;
     }
 
-    private static List<SampleResult> calculateAllowPlaces() throws InterruptedException {
+    private static List<SampleResult> calculate() throws InterruptedException {
         List<SampleResult> result = Collections.synchronizedList(new ArrayList<>());
-        ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
-        Config.THRESHOLDS.forEach(threshold -> Config.getSamples().forEach(path -> es.execute(() -> {
-            JSpeexEnc encoder;
-            if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstLast)) {
-                encoder = getSpeexEncoder(new HideF0EncoderFirstLast(Config.LOG_LEVEL, threshold, path));
-            } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstFirst)) {
-                encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(Config.LOG_LEVEL, threshold, path));
-            } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstLastRand)) {
-                encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(Config.LOG_LEVEL, threshold, path));
-            } else {
-                throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.toString());
-            }
-            try {
-                BitsCollector bitsCollector = encoder.encode();
-                HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
-                synchronized (result) {
+        for (Integer threshold : Config.THRESHOLDS) {
+            ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
+            Config.getSamples().forEach(path -> es.execute(() -> {
+                JSpeexEnc encoder;
+                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST)) {
+                    encoder = getSpeexEncoder(new HideF0EncoderFirstLast(threshold, path));
+                } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                    encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(threshold, path));
+                } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
+                    encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold, path));
+                } else {
+                    throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.toString());
+                }
+                try {
+                    BitsCollector bitsCollector = encoder.encode();
+                    HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
                     bitsCollector.setPath(hideF0Encoder.getPitchCollector().getPath());
                     bitsCollector.setThreshold(hideF0Encoder.getPitchCollector().getThreshold());
-                    System.out.println("Encoded:\t" + path + "\t" + threshold + "\t" + hideF0Encoder.getNumberOfHiddenPositions());
+                    log.info("Encoded:\tSample: " + hideF0Encoder.getPitchCollector().getSampleName() + "\t, Threshold: " + threshold);
                     result.add(new SampleResult(
                             new AllowPlaces(path, threshold, hideF0Encoder.getNumberOfHiddenPositions()),
                             hideF0Encoder.getPitchCollector(),
                             bitsCollector
                     ));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            }));
+            es.shutdown();
+            boolean finished = es.awaitTermination(24, TimeUnit.HOURS);
+            if (!finished) {
+                throw new Error("Some Error");
             }
-        })));
-        es.shutdown();
-        boolean finished = es.awaitTermination(24, TimeUnit.HOURS);
-        if (!finished) {
-            throw new Error("Some Error");
+            System.gc();
         }
         return result;
     }
 
     private static void runDecoding(List<String> paths) throws IOException {
-        System.out.println("Decoding....");
+        log.debug("Decoding....");
         for (String p : paths) {
             @NotNull JSpeexDec decoder = getSpeexDecoder(p);
             decoder.decode();
+            log.info("Decoded:\t" + p);
         }
-        System.out.println("Decoded");
+        log.debug("Decoded");
     }
 
 }

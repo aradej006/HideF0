@@ -24,13 +24,13 @@ public class WekaResultsCollector {
 
     public static void main(@NotNull final String[] args) throws InterruptedException {
         Map<String, List<WekaResult>> resultsMap = new HashMap<>();
-        if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstLast)) {
+        if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST)) {
             String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
             resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
-        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstFirst)) {
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
             String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
             resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
-        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FirstLastRand)) {
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
             String pathFLRand = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
             resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
         } else {
@@ -101,9 +101,7 @@ public class WekaResultsCollector {
                 Evaluation eval = new Evaluation(train);
                 eval.evaluateModel(classifier, test);
                 WekaResult result = new WekaResult(eval, classifier, path);
-                synchronized (results) {
-                    results.add(result);
-                }
+                results.add(result);
                 System.out.println("Evaluated for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
                 System.out.println("Result:\t" + result.getPtcCorrect() + "\t" + result.getRocArea());
                 stopWatch.stop();
