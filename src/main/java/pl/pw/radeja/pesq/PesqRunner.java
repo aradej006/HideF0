@@ -1,5 +1,6 @@
 package pl.pw.radeja.pesq;
 
+import lombok.extern.slf4j.Slf4j;
 import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pesq.common.PesqResult;
 
@@ -10,6 +11,7 @@ import java.util.*;
 
 import static pl.pw.radeja.Config.BASE_PATH;
 
+@Slf4j
 public final class PesqRunner {
     public static List<PesqResult> run(List<PesqFiles> files) throws InterruptedException, IOException {
         List<PesqResult> results = Collections.synchronizedList(new ArrayList<>());
@@ -18,7 +20,7 @@ public final class PesqRunner {
         for (PesqFiles f : files) {
             String command = BASE_PATH.resolve("PESQ").toAbsolutePath().toString() + " +8000 " + f.getPathToReference() + " " + f.getPathToDegraded();
             Process p = rt.exec(command);
-            System.out.println("Executing:\t" + command);
+            log.info("Executing:\t" + command);
             processes.put(command, p);
             new Thread(() -> {
                 BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
@@ -37,7 +39,7 @@ public final class PesqRunner {
         }
         for (Map.Entry<String, Process> entry : processes.entrySet()) {
             entry.getValue().waitFor();
-            System.out.println("Executed:\t" + entry.getKey());
+            log.info("Executed:\t" + entry.getKey());
         }
         return results;
     }

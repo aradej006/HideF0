@@ -2,12 +2,17 @@ package pl.pw.radeja.weka.printers;
 
 import org.apache.commons.math3.complex.Complex;
 import org.jtransforms.fft.DoubleFFT_1D;
+import pl.pw.radeja.Config;
 import pl.pw.radeja.speex.pitch.collectors.PitchCollector;
 import pl.pw.radeja.speex.pitch.collectors.PitchValue;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -16,7 +21,7 @@ import java.util.stream.Collectors;
 import static pl.pw.radeja.Config.BASE_PATH;
 
 public final class WekaPrinter {
-    private final static String filePath = BASE_PATH.resolve("weka").toAbsolutePath().toString() + "/hideF0-";
+    private final static String filePath = BASE_PATH.resolve("weka" + Config.HIDE_F0_TYPE.getName()).toAbsolutePath().toString() + "/hideF0-";
     private final static String extension = ".arff";
     private final static String hasHideF0 = "HideF0";
     private final static String hasNotHideF0 = "NoHideF0";
@@ -38,8 +43,12 @@ public final class WekaPrinter {
                                        Predicate<List<PitchValue>> hasHideF0Saver) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
-                PrintWriter pw = new PrintWriter(filePath + threshold + "-" + numberOfFrames + '-' + name + extension, "UTF-8");
-                PrintWriter pwFft = new PrintWriter(filePath + threshold + "-fft-" + numberOfFrames + '-' + name + extension, "UTF-8");
+                Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + extension);
+                Files.createDirectories(path.getParent());
+                PrintWriter pw = new PrintWriter(path.toFile(), "UTF-8");
+                Path pathFft = Paths.get(filePath + threshold + "-fft-" + numberOfFrames + '-' + name + extension);
+                Files.createDirectories(pathFft.getParent());
+                PrintWriter pwFft = new PrintWriter(pathFft.toFile(), "UTF-8");
                 printHeader(pw, numberOfFrames);
                 printFftHeader(pwFft, numberOfFrames);
                 pitchCollectorList
@@ -69,7 +78,7 @@ public final class WekaPrinter {
                         );
                 pw.close();
                 pwFft.close();
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });

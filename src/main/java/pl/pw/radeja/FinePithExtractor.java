@@ -33,6 +33,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static pl.pw.radeja.Config.WEKA_FRAMES_PER_RECORD;
+
 @Slf4j
 public class FinePithExtractor {
 
@@ -60,7 +62,7 @@ public class FinePithExtractor {
             Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToPesq.add(
                     new PesqFiles(
                             s + ".wav",
-                            s + "-hide-" + t + "-dec-" + Config.HIDE_F0_TYPE.toString() + ".wav"
+                            s + "-hide-" + t + "-dec-" + Config.HIDE_F0_TYPE.getName() + ".wav"
                     ))));
             pesqResults = PesqRunner.run(filesToPesq);
         }
@@ -78,10 +80,10 @@ public class FinePithExtractor {
             });
         }
         if (Config.PRINT_WEKA_FILES) {
-            WekaPrinter.print(result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), 1);
+            WekaPrinter.print(result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), WEKA_FRAMES_PER_RECORD);
         }
         if (Config.PRINT_WEKA_VECTOR_FILES) {
-            WekaVectorPrinter.print(result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), 10);
+            WekaVectorPrinter.print(result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), WEKA_FRAMES_PER_RECORD);
         }
 
         //print results
@@ -119,7 +121,7 @@ public class FinePithExtractor {
     private static JSpeexDec getSpeexDecoder(final String filename) {
         @NotNull JSpeexDec dec = new JSpeexDec();
         dec.srcFile = filename + ".spx";
-        dec.destFile = filename + "-dec-" + Config.HIDE_F0_TYPE.toString() + ".wav";
+        dec.destFile = filename + "-dec-" + Config.HIDE_F0_TYPE.getName() + ".wav";
         dec.srcFormat = JSpeexDec.FILE_FORMAT_OGG;
         dec.destFormat = JSpeexDec.FILE_FORMAT_WAVE;
         dec.printlevel = JSpeexDec.ERROR;
@@ -140,7 +142,7 @@ public class FinePithExtractor {
                 } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
                     encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold, path));
                 } else {
-                    throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.toString());
+                    throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
                 }
                 try {
                     BitsCollector bitsCollector = encoder.encode();

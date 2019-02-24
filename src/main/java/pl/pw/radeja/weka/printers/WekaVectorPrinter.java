@@ -1,12 +1,17 @@
 package pl.pw.radeja.weka.printers;
 
+import pl.pw.radeja.Config;
 import pl.pw.radeja.speex.pitch.changers.LinearApproximateChanger;
 import pl.pw.radeja.speex.pitch.collectors.PitchCollector;
 import pl.pw.radeja.speex.pitch.collectors.PitchValue;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -14,7 +19,7 @@ import java.util.stream.Collectors;
 import static pl.pw.radeja.Config.BASE_PATH;
 
 public class WekaVectorPrinter {
-    private final static String filePath = BASE_PATH.resolve("wekaVector") + "/hideF0-";
+    private final static String filePath = BASE_PATH.resolve("weka" + Config.HIDE_F0_TYPE.getVectorName()) + "/hideF0-";
     private final static String extension = ".arff";
     private final static String hasHideF0 = "HideF0";
     private final static String hasNotHideF0 = "NoHideF0";
@@ -34,7 +39,9 @@ public class WekaVectorPrinter {
                                        Predicate<List<PitchValue>> hasHideF0Saver) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
-                PrintWriter pw = new PrintWriter(filePath + threshold + "-" + numberOfFrames + '-' + name + extension, "UTF-8");
+                Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + extension);
+                Files.createDirectories(path.getParent());
+                PrintWriter pw = new PrintWriter(path.toFile(), "UTF-8");
                 printHeader(pw, numberOfFrames);
                 pitchCollectorList
                         .stream()
@@ -63,7 +70,7 @@ public class WekaVectorPrinter {
                                                 })
                         );
                 pw.close();
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         });

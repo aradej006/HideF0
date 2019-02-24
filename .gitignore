@@ -6,11 +6,7 @@ TIMIT_F/*-hide-*.wav
 TIMIT_M/*.spx
 TIMIT_M/*.txt
 TIMIT_M/*-hide-*.wav
-weka/*
-wekaVector/*
-wekaFF/*
-wekaFL/*
-wekaFLRand/*
+weka*/*
 
 ### Java template
 *.class
