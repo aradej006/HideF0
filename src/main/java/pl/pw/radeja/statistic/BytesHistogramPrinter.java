@@ -13,7 +13,11 @@ public class BytesHistogramPrinter {
     public static void printHistograms(List<BitsCollector> bitsCollectors) {
         Map<Integer, List<BitsCollector>> collect = bitsCollectors.stream()
                 .collect(Collectors.groupingBy(BitsCollector::getThreshold, Collectors.toList()));
-        Map<Integer, Map<String, Map<Integer, Long>>> thresholdToSampleNameToValueToCount = collect.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().stream().collect(Collectors.toMap(BitsCollector::getSampleName, BitsCollectorParser::getHistogramData))));
+        Map<Integer, Map<String, Map<Integer, Long>>> thresholdToSampleNameToValueToCount = collect.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        v -> v.getValue().stream().collect(Collectors.toMap(BitsCollector::getSampleName, BitsCollectorParser::getHistogramData))));
+
         thresholdToSampleNameToValueToCount.forEach((threshold, thToValToCnt) -> {
             List<String> sampleNames = new ArrayList<>(thToValToCnt.keySet());
             Collections.sort(sampleNames);

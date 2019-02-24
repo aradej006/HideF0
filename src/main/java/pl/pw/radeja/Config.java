@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class Config {
-    public static final int NUMBER_OF_THREADS = 8;
+    public static final int NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
     public static final boolean CALCULATE_ALLOW_PLACES = true;
     public static final boolean DECODE_FILES = false;
     public static final boolean CALCUALTE_PESQ = false;
@@ -20,8 +20,8 @@ public final class Config {
 //    static final List<Integer> THRESHOLDS = Arrays.asList(0);
 
     public static List<String> getSamples() {
-        final String baseMalePath = "D:/PracaMgr/master-thesis/TIMIT_M/";
-        final String baseFemalePath = "D:/PracaMgr/master-thesis/TIMIT_F/";
+        final String baseMalePath = "E:/mgr//master-thesis/TIMIT_M/";
+        final String baseFemalePath = "E:/mgr//master-thesis/TIMIT_F/";
 //        final int maleLimit = 2;
         final int maleLimit = 25;
 //        final int femaleLimit = 1;

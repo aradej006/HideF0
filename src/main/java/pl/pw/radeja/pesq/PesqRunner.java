@@ -14,7 +14,7 @@ public final class PesqRunner {
         Runtime rt = Runtime.getRuntime();
         Map<String, Process> processes = new HashMap<>();
         for (PesqFiles f : files) {
-            String command = "D:/PracaMgr/master-thesis/PESQ +8000 " + f.getPathToReference() + " " + f.getPathToDegraded();
+            String command = "E:/mgr//master-thesis/PESQ +8000 " + f.getPathToReference() + " " + f.getPathToDegraded();
             Process p = rt.exec(command);
             System.out.println("Executing:\t" + command);
             processes.put(command, p);

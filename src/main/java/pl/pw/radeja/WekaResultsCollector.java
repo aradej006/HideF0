@@ -25,13 +25,13 @@ public class WekaResultsCollector {
     public static void main(@NotNull final String[] args) throws InterruptedException {
         Map<String, List<WekaResult>> resultsMap = new HashMap<>();
         if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST)) {
-            String pathFL = "D:/PracaMgr/master-thesis/wekaFL/hideF0-";
+            String pathFL = "E:/mgr//master-thesis/wekaFL/hideF0-";
             resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
-            String pathFF = "D:/PracaMgr/master-thesis/wekaFF/hideF0-";
+            String pathFF = "E:/mgr//master-thesis/wekaFF/hideF0-";
             resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
-            String pathFLRand = "D:/PracaMgr/master-thesis/wekaFLRand/hideF0-";
+            String pathFLRand = "E:/mgr//master-thesis/wekaFLRand/hideF0-";
             resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
         } else {
             throw new Error("Add new path to Weka files to your new HideF0 variant: " + Config.HIDE_F0_TYPE.toString());

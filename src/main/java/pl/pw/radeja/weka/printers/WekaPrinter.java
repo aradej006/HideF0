@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class WekaPrinter {
-    private final static String filePath = "D:/PracaMgr/master-thesis/weka/hideF0-";
+    private final static String filePath = "E:/mgr//master-thesis/weka/hideF0-";
     private final static String extension = ".arff";
     private final static String hasHideF0 = "HideF0";
     private final static String hasNotHideF0 = "NoHideF0";
