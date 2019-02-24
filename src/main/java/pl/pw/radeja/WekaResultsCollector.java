@@ -17,6 +17,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static pl.pw.radeja.Config.BASE_PATH;
+
 public class WekaResultsCollector {
 
     static String trainExt = "-1-train.arff";
@@ -25,13 +27,13 @@ public class WekaResultsCollector {
     public static void main(@NotNull final String[] args) throws InterruptedException {
         Map<String, List<WekaResult>> resultsMap = new HashMap<>();
         if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST)) {
-            String pathFL = "E:/mgr//master-thesis/wekaFL/hideF0-";
+            String pathFL = BASE_PATH.resolve("wekaFL").toAbsolutePath().toString() + "/hideF0-";
             resultsMap.put(pathFL, Collections.synchronizedList(new ArrayList<>()));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
-            String pathFF = "E:/mgr//master-thesis/wekaFF/hideF0-";
+            String pathFF = BASE_PATH.resolve("wekaFF").toAbsolutePath().toString() + "/hideF0-";
             resultsMap.put(pathFF, Collections.synchronizedList(new ArrayList<>()));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
-            String pathFLRand = "E:/mgr//master-thesis/wekaFLRand/hideF0-";
+            String pathFLRand = BASE_PATH.resolve("wekaFLRand").toAbsolutePath().toString() + "/hideF0-";
             resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
         } else {
             throw new Error("Add new path to Weka files to your new HideF0 variant: " + Config.HIDE_F0_TYPE.toString());

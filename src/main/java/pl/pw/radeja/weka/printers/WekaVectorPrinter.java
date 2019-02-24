@@ -11,8 +11,10 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static pl.pw.radeja.Config.BASE_PATH;
+
 public class WekaVectorPrinter {
-    private final static String filePath = "E:/mgr//master-thesis/wekaVector/hideF0-";
+    private final static String filePath = BASE_PATH.resolve("wekaVector") + "/hideF0-";
     private final static String extension = ".arff";
     private final static String hasHideF0 = "HideF0";
     private final static String hasNotHideF0 = "NoHideF0";

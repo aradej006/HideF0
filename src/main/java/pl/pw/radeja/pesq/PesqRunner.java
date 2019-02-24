@@ -8,13 +8,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
 
+import static pl.pw.radeja.Config.BASE_PATH;
+
 public final class PesqRunner {
     public static List<PesqResult> run(List<PesqFiles> files) throws InterruptedException, IOException {
         List<PesqResult> results = Collections.synchronizedList(new ArrayList<>());
         Runtime rt = Runtime.getRuntime();
         Map<String, Process> processes = new HashMap<>();
         for (PesqFiles f : files) {
-            String command = "E:/mgr//master-thesis/PESQ +8000 " + f.getPathToReference() + " " + f.getPathToDegraded();
+            String command = BASE_PATH.resolve("PESQ").toAbsolutePath().toString() + " +8000 " + f.getPathToReference() + " " + f.getPathToDegraded();
             Process p = rt.exec(command);
             System.out.println("Executing:\t" + command);
             processes.put(command, p);

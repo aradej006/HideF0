@@ -13,8 +13,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static pl.pw.radeja.Config.BASE_PATH;
+
 public final class WekaPrinter {
-    private final static String filePath = "E:/mgr//master-thesis/weka/hideF0-";
+    private final static String filePath = BASE_PATH.resolve("weka").toAbsolutePath().toString() + "/hideF0-";
     private final static String extension = ".arff";
     private final static String hasHideF0 = "HideF0";
     private final static String hasNotHideF0 = "NoHideF0";
