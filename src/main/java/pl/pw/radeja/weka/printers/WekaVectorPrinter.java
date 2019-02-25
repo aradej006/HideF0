@@ -30,6 +30,7 @@ public class WekaVectorPrinter {
         Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining, hasHideF0SaverTraining);
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest, hasHideF0SaverTest);
+        printTrainTest(thresholdToPitchCollector, numberOfFrames, "test-no", isTest, hasHideF0SaverTestNoHideF0);
     }
 
     private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector,
@@ -99,8 +100,8 @@ public class WekaVectorPrinter {
     private static Predicate<List<PitchValue>> hasHideF0SaverTraining = (p) -> {
         boolean isChanged = p.stream().anyMatch(PitchValue::isChanged);
         long thZeroCount = p.stream().filter(v -> v.getCalculatedThreshold() == 0).count();
-//        if (thZeroCount == (long) p.size() && rand.nextInt(100) < 10) {
-        if (thZeroCount == (long) p.size()) {
+        if (thZeroCount > 0 && rand.nextInt(100) < Config.WEKA_TRAINING_TH_0_RAND * 10) {
+//        if (thZeroCount > 0) {
             return false;
         } else {
             return isChanged;
@@ -108,6 +109,7 @@ public class WekaVectorPrinter {
     };
     private static Predicate<PitchCollector> isTest = (p) -> WekaVectorPrinter.TEST_SET.contains(p.getSampleName());
     private static Predicate<List<PitchValue>> hasHideF0SaverTest = (p) -> p.stream().anyMatch(PitchValue::isChanged);
+    private static Predicate<List<PitchValue>> hasHideF0SaverTestNoHideF0 = (p) -> false;
 
 
     private static List<String> TRAINING_SET = Arrays.asList(

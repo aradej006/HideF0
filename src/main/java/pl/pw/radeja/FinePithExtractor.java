@@ -145,6 +145,7 @@ public class FinePithExtractor {
                     throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
                 }
                 try {
+                    log.debug("Encoding:\tSample: " + encoder.getHideF0Encoder().getPitchCollector().getSampleName() + "\t, Threshold: " + threshold);
                     BitsCollector bitsCollector = encoder.encode();
                     HideF0Encoder hideF0Encoder = encoder.getHideF0Encoder();
                     bitsCollector.setPath(hideF0Encoder.getPitchCollector().getPath());

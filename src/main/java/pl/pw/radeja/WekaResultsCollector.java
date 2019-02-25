@@ -7,8 +7,6 @@ import pl.pw.radeja.weka.WekaResult;
 import pl.pw.radeja.weka.WekaResultPrinter;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
-import weka.classifiers.functions.Logistic;
-import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.converters.ArffLoader;
 
@@ -67,19 +65,8 @@ public class WekaResultsCollector {
         log.info("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
     }
 
-    static List<Classifier> getClassifiers() {
-        List<Classifier> classifiers = new ArrayList<>();
-//        classifiers.add(new AdaBoostM1());
-        classifiers.add(new Logistic());
-//        classifiers.add(new MultilayerPerceptron());
-//        classifiers.add(new NaiveBayes());
-//        classifiers.add(new RandomForest());
-//        classifiers.add(new SMO());
-        return classifiers;
-    }
-
     private static void runMachineLearning(String path, List<WekaResult> results) throws InterruptedException {
-        List<Classifier> cls = getClassifiers();
+        List<Classifier> cls = Config.getWekaClassifiers();
         ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
 
         cls.forEach(classifier -> es.execute(() -> {
