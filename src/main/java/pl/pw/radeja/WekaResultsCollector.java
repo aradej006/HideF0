@@ -41,7 +41,7 @@ public class WekaResultsCollector {
 
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
+        ExecutorService es = Config.getExecutorService();
         Config.THRESHOLDS.forEach(th -> es.execute(() -> resultsMap.keySet().forEach(path -> {
             try {
                 runMachineLearning(path + th, resultsMap.get(path));
@@ -67,7 +67,7 @@ public class WekaResultsCollector {
 
     private static void runMachineLearning(String path, List<WekaResult> results) throws InterruptedException {
         List<Classifier> cls = Config.getWekaClassifiers();
-        ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
+        ExecutorService es = Config.getExecutorService();
 
         cls.forEach(classifier -> es.execute(() -> {
             try {

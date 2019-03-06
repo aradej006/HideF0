@@ -4,8 +4,8 @@ import java.util.List;
 
 public class NonPitchChanger extends PitchChanger {
 
-    public NonPitchChanger() {
-        super(0);
+    public NonPitchChanger(Integer threshold) {
+        super(threshold);
     }
 
     @Override
@@ -16,15 +16,5 @@ public class NonPitchChanger extends PitchChanger {
     @Override
     public boolean shouldChange(List<Integer> pitches) {
         return false;
-    }
-
-    @Override
-    public boolean isLinear(List<Integer> pitches) {
-        return false;
-    }
-
-    @Override
-    public Integer calculateThreshold(List<Integer> pitches) {
-        return null;
     }
 }

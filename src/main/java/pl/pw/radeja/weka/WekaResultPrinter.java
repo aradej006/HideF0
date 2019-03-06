@@ -3,7 +3,6 @@ package pl.pw.radeja.weka;
 import weka.classifiers.Classifier;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class WekaResultPrinter {
@@ -13,17 +12,33 @@ public class WekaResultPrinter {
         List<Integer> thresholds = new ArrayList<>(resultMap.keySet());
         Collections.sort(thresholds);
         List<String> classifiers = getClassifiers(resultMap);
-        System.out.println("\t\t\tWekaResults\t");
-        System.out.println("Threshold\t" + String.join("\t\t", classifiers));
-        System.out.println("Threshold\t" + classifiers.stream().map(c -> "PrcCorrect\tROC Area").collect(Collectors.joining("\t")));
+        System.out.println("WekaVectorResults");
+
+        StringBuilder prcCorrect = getBuilder("PrcCorrect", classifiers);
+        StringBuilder rocArea = getBuilder("ROC Area", classifiers);
+        StringBuilder precision = getBuilder("Precision", classifiers);
+        StringBuilder recall = getBuilder("Recall", classifiers);
         thresholds.forEach(th -> {
-            AtomicReference<String> line = new AtomicReference<>(th.toString() + '\t');
+            prcCorrect.append(th.toString()).append('\t');
+            rocArea.append(th.toString()).append('\t');
+            precision.append(th.toString()).append('\t');
+            recall.append(th.toString()).append('\t');
             classifiers.forEach(classifier -> {
                 WekaResult result = resultMap.get(th).get(classifier);
-                line.updateAndGet(v -> v + result.getPtcCorrect() + '\t' + result.getRocArea() + '\t');
+                prcCorrect.append(result.getPtcCorrect()).append('\t');
+                rocArea.append(result.getRocArea()).append('\t');
+                precision.append(result.getPrecision()).append('\t');
+                recall.append(result.getRecall()).append('\t');
             });
-            System.out.println(line);
+            prcCorrect.append('\n');
+            rocArea.append('\n');
+            precision.append('\n');
+            recall.append('\n');
         });
+        System.out.println(prcCorrect.toString());
+        System.out.println(rocArea.toString());
+        System.out.println(precision.toString());
+        System.out.println(recall.toString());
     }
 
     private static Map<Integer, Map<String, WekaResult>> getResultMap(List<WekaResult> results) {
@@ -44,5 +59,11 @@ public class WekaResultPrinter {
 
     private static String getClassifierName(Classifier c) {
         return c.getClass().getName().substring(c.getClass().getName().lastIndexOf('.') + 1);
+    }
+
+    private static StringBuilder getBuilder(String paramName, List<String> classifiers) {
+        StringBuilder builder = new StringBuilder(paramName).append("\n");
+        builder.append("Threshold\t").append(String.join("\t", classifiers)).append("\n");
+        return builder;
     }
 }

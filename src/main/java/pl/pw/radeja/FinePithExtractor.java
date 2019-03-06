@@ -7,10 +7,7 @@ import pl.pw.radeja.pesq.PesqResultPrinter;
 import pl.pw.radeja.pesq.PesqRunner;
 import pl.pw.radeja.pesq.common.PesqFiles;
 import pl.pw.radeja.pesq.common.PesqResult;
-import pl.pw.radeja.speex.encoders.HideF0Encoder;
-import pl.pw.radeja.speex.encoders.HideF0EncoderFirstFirst;
-import pl.pw.radeja.speex.encoders.HideF0EncoderFirstLast;
-import pl.pw.radeja.speex.encoders.HideF0EncoderFirstLastRand;
+import pl.pw.radeja.speex.encoders.*;
 import pl.pw.radeja.speex.pitch.collectors.CalculatedThresholdPrinter;
 import pl.pw.radeja.speex.pitch.collectors.PitchCollectorPrint;
 import pl.pw.radeja.speex.result.AllowPlaces;
@@ -43,8 +40,12 @@ public class FinePithExtractor {
         stopWatch.start();
         // calculate allow places
         List<SampleResult> result = new ArrayList<>();
+        List<SampleResult> wekaResults = new ArrayList<>();
         if (Config.CALCULATE_ALLOW_PLACES) {
-            result = calculate();
+            result = calculate(false);
+        }
+        if (Config.PRINT_WEKA_FILES || Config.PRINT_WEKA_VECTOR_FILES) {
+            wekaResults = calculate(true);
         }
 
         // decoding
@@ -53,7 +54,6 @@ public class FinePithExtractor {
             Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToDecode.add(s + "-hide-" + t)));
             runDecoding(filesToDecode);
         }
-
 
         //pesq
         List<PesqResult> pesqResults = new ArrayList<>();
@@ -80,10 +80,10 @@ public class FinePithExtractor {
             });
         }
         if (Config.PRINT_WEKA_FILES) {
-            WekaPrinter.print(result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), WEKA_FRAMES_PER_RECORD);
+            WekaPrinter.print(wekaResults.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), WEKA_FRAMES_PER_RECORD);
         }
         if (Config.PRINT_WEKA_VECTOR_FILES) {
-            WekaVectorPrinter.print(result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), WEKA_FRAMES_PER_RECORD);
+            WekaVectorPrinter.print(wekaResults.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()), WEKA_FRAMES_PER_RECORD);
         }
 
         //print results
@@ -129,21 +129,12 @@ public class FinePithExtractor {
         return dec;
     }
 
-    private static List<SampleResult> calculate() throws InterruptedException {
+    private static List<SampleResult> calculate(boolean calculateForWekaFiles) throws InterruptedException {
         List<SampleResult> result = Collections.synchronizedList(new ArrayList<>());
         for (Integer threshold : Config.THRESHOLDS) {
-            ExecutorService es = Executors.newFixedThreadPool(Config.NUMBER_OF_THREADS);
+            ExecutorService es = Config.getExecutorService();
             Config.getSamples().forEach(path -> es.execute(() -> {
-                JSpeexEnc encoder;
-                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST)) {
-                    encoder = getSpeexEncoder(new HideF0EncoderFirstLast(threshold, path));
-                } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
-                    encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(threshold, path));
-                } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
-                    encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold, path));
-                } else {
-                    throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
-                }
+                JSpeexEnc encoder = getEncoder(threshold, path, calculateForWekaFiles);
                 try {
                     log.debug("Encoding:\tSample: " + encoder.getHideF0Encoder().getPitchCollector().getSampleName() + "\t, Threshold: " + threshold);
                     BitsCollector bitsCollector = encoder.encode();
@@ -168,6 +159,22 @@ public class FinePithExtractor {
             System.gc();
         }
         return result;
+    }
+
+    private static JSpeexEnc getEncoder(Integer threshold, String path, boolean calculateForWekaFiles) {
+        JSpeexEnc encoder;
+        if (calculateForWekaFiles && WekaVectorPrinter.getNoHideF0Set().contains(Config.getSampleNameFromPath(path))) {
+            encoder = getSpeexEncoder(new NonHideF0Encoder(threshold, path));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstLast(threshold, path));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(threshold, path));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold, path));
+        } else {
+            throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
+        }
+        return encoder;
     }
 
     private static void runDecoding(List<String> paths) throws IOException {

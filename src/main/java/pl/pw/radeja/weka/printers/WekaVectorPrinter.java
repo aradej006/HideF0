@@ -1,20 +1,20 @@
 package pl.pw.radeja.weka.printers;
 
 import pl.pw.radeja.Config;
-import pl.pw.radeja.speex.pitch.changers.LinearApproximateChanger;
+import pl.pw.radeja.speex.pitch.changers.PitchChanger;
 import pl.pw.radeja.speex.pitch.collectors.PitchCollector;
 import pl.pw.radeja.speex.pitch.collectors.PitchValue;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static pl.pw.radeja.Config.BASE_PATH;
 
@@ -30,14 +30,13 @@ public class WekaVectorPrinter {
         Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining, hasHideF0SaverTraining);
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest, hasHideF0SaverTest);
-        printTrainTest(thresholdToPitchCollector, numberOfFrames, "test-no", isTest, hasHideF0SaverTestNoHideF0);
     }
 
     private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector,
                                        int numberOfFrames,
                                        String name,
                                        Predicate<PitchCollector> filter,
-                                       Predicate<List<PitchValue>> hasHideF0Saver) {
+                                       BiPredicate<List<PitchValue>, PitchCollector> hasHideF0Saver) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
                 Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + extension);
@@ -52,14 +51,14 @@ public class WekaVectorPrinter {
                                                 .stream()
                                                 .filter(p -> p.size() == numberOfFrames)
                                                 .forEach(p -> {
-                                                    boolean hasHideF0 = hasHideF0Saver.test(p);
+                                                    boolean hasHideF0 = hasHideF0Saver.test(p, pitchCollector);
                                                     //print normal;
                                                     pw.println(p.stream().map(framePitchValues -> {
                                                         List<Integer> delta = new ArrayList<>();
                                                         int first = framePitchValues.getPitchValues().get(0);
                                                         int last = framePitchValues.getPitchValues().get(3);
-                                                        delta.add(LinearApproximateChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
-                                                        delta.add(LinearApproximateChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
+                                                        delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
+                                                        delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
                                                         return delta.stream().map(Math::abs).map(Objects::toString).collect(Collectors.toList());
                                                     }).flatMap(List::stream)
                                                             .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaVectorPrinter.hasHideF0 : WekaVectorPrinter.hasNotHideF0));
@@ -96,27 +95,53 @@ public class WekaVectorPrinter {
         return collection;
     }
 
-    private static Predicate<PitchCollector> isTraining = (p) -> WekaVectorPrinter.TRAINING_SET.contains(p.getSampleName());
-    private static Predicate<List<PitchValue>> hasHideF0SaverTraining = (p) -> {
-        boolean isChanged = p.stream().anyMatch(PitchValue::isChanged);
-        long thZeroCount = p.stream().filter(v -> v.getCalculatedThreshold() == 0).count();
-        if (thZeroCount > 0 && rand.nextInt(100) < Config.WEKA_TRAINING_TH_0_RAND * 10) {
+    private static final Predicate<PitchCollector> isTraining = (p) -> getTrainingSet().contains(p.getSampleName());
+    private static final BiPredicate<List<PitchValue>, PitchCollector> hasHideF0SaverTraining = (p, collector) -> {
+//        boolean isChanged = p.stream().anyMatch(PitchValue::isChanged);
+//        long thZeroCount = p.stream().filter(v -> v.getCalculatedThreshold() == 0).count();
+//        if (thZeroCount > 0 && rand.nextInt(100) < Config.WEKA_TRAINING_TH_0_RAND * 100) {
 //        if (thZeroCount > 0) {
-            return false;
-        } else {
-            return isChanged;
-        }
+//            return false;
+//        } else {
+//            return isChanged;
+//        }
+        return WekaVectorPrinter.TRAINING_SET_HIDE_FO.contains(collector.getSampleName());
     };
-    private static Predicate<PitchCollector> isTest = (p) -> WekaVectorPrinter.TEST_SET.contains(p.getSampleName());
-    private static Predicate<List<PitchValue>> hasHideF0SaverTest = (p) -> p.stream().anyMatch(PitchValue::isChanged);
-    private static Predicate<List<PitchValue>> hasHideF0SaverTestNoHideF0 = (p) -> false;
+    private static final Predicate<PitchCollector> isTest = (p) -> getTestSet().contains(p.getSampleName());
+    private static final BiPredicate<List<PitchValue>, PitchCollector> hasHideF0SaverTest = (p, collector) -> {
+//        p.stream().anyMatch(PitchValue::isChanged)
+        return WekaVectorPrinter.TEST_SET_HIDE_FO.contains(collector.getSampleName());
+    };
 
 
-    private static List<String> TRAINING_SET = Arrays.asList(
-            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12", "F13", "F14", "F15", "F16",
-            "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12", "M13", "M14", "M15", "M16");
+    public static final List<String> TRAINING_SET_NO_HIDE_FO = Arrays.asList(
+            "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+            "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10", "M11", "M12");
 
-    private static List<String> TEST_SET = Arrays.asList(
-            "F17", "F18", "F19", "F20", "F21", "F22", "F23", "F24",
-            "M17", "M18", "M19", "M20", "M21", "M22", "M23", "M24");
+    public static final List<String> TRAINING_SET_HIDE_FO = Arrays.asList(
+            "F13", "F14", "F15", "F16",
+            "M13", "M14", "M15", "M16");
+
+    public static final List<String> TEST_SET_NON_HIDE_F0 = Arrays.asList(
+            "F17", "F18", "F19", "F20", "F21", "F22",
+            "M17", "M18", "M19", "M20", "M21", "M22");
+    public static final List<String> TEST_SET_HIDE_FO = Arrays.asList(
+            "F23", "F24",
+            "M23", "M24");
+
+    public static List<String> getTrainingSet() {
+        return Stream.concat(TRAINING_SET_NO_HIDE_FO.stream(), TRAINING_SET_HIDE_FO.stream()).collect(Collectors.toList());
+    }
+
+    public static List<String> getTestSet() {
+        return Stream.concat(TEST_SET_NON_HIDE_F0.stream(), TEST_SET_HIDE_FO.stream()).collect(Collectors.toList());
+    }
+
+    public static List<String> getHideF0Set() {
+        return Stream.concat(TRAINING_SET_HIDE_FO.stream(), TEST_SET_HIDE_FO.stream()).collect(Collectors.toList());
+    }
+
+    public static List<String> getNoHideF0Set() {
+        return Stream.concat(TRAINING_SET_NO_HIDE_FO.stream(), TEST_SET_NON_HIDE_F0.stream()).collect(Collectors.toList());
+    }
 }

@@ -26,6 +26,14 @@ public class WekaResult {
         return eval.pctCorrect();
     }
 
+    public double getPrecision() {
+        return eval.weightedPrecision();
+    }
+
+    public double getRecall() {
+        return eval.weightedRecall();
+    }
+
     public Classifier getClassifier() {
         return classifier;
     }
