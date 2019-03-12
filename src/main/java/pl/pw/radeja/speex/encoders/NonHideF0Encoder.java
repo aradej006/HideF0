@@ -5,6 +5,7 @@ import pl.pw.radeja.speex.pitch.changers.NonPitchChanger;
 import pl.pw.radeja.speex.pitch.changers.PitchChanger;
 import pl.pw.radeja.speex.result.SpeexBits;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NonHideF0Encoder extends HideF0Encoder {
@@ -22,7 +23,7 @@ public class NonHideF0Encoder extends HideF0Encoder {
     protected List<Pair<Integer, SpeexBits>> getPitches(List<SpeexBits> chunk, List<SpeexBits> nextChunk) {
         List<Pair<Integer, SpeexBits>> pitch = getPitches(chunk);
         pitch.addAll(getPitches(nextChunk));
-        return pitch.subList(0, 5);
+        return new ArrayList<>(pitch.subList(0, 5));
     }
 
 }

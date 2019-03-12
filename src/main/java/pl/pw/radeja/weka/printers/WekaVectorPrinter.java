@@ -49,19 +49,35 @@ public class WekaVectorPrinter {
                         .forEach(pitchCollector ->
                                         partition(pitchCollector.getFramePitchValues(), numberOfFrames)
                                                 .stream()
-                                                .filter(p -> p.size() == numberOfFrames)
+                                                .map(windowFrames -> {
+                                                    if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                                                        for (int i = 0; i < numberOfFrames; i++) {
+                                                            if (windowFrames.get(i).getPitchValues().size() < 5) {
+                                                                windowFrames.get(i).getPitchValues().add(windowFrames.get(i + 1).getPitchValues().get(0));
+                                                            }
+                                                        }
+                                                        windowFrames.remove(windowFrames.get(windowFrames.size() - 1));
+                                                    }
+                                                    return windowFrames;
+                                                })
                                                 .forEach(p -> {
                                                     boolean hasHideF0 = hasHideF0Saver.test(p, pitchCollector);
                                                     //print normal;
-                                                    pw.println(p.stream().map(framePitchValues -> {
-                                                        List<Integer> delta = new ArrayList<>();
-                                                        int first = framePitchValues.getPitchValues().get(0);
-                                                        int last = framePitchValues.getPitchValues().get(3);
-                                                        delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
-                                                        delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
-                                                        return delta.stream().map(Math::abs).map(Objects::toString).collect(Collectors.toList());
-                                                    }).flatMap(List::stream)
-                                                            .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaVectorPrinter.hasHideF0 : WekaVectorPrinter.hasNotHideF0));
+                                                    String frameDeltas = p.stream()
+                                                            .map(framePitchValues -> {
+                                                                List<Integer> delta = new ArrayList<>();
+                                                                int first = framePitchValues.getPitchValues().get(0);
+                                                                int last = framePitchValues.getPitchValues().get(framePitchValues.getPitchValues().size() - 1);
+                                                                delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
+                                                                delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
+                                                                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                                                                    delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 3) - framePitchValues.getPitchValues().get(3));
+                                                                }
+                                                                return delta.stream().map(Math::abs).map(Objects::toString).collect(Collectors.toList());
+                                                            })
+                                                            .flatMap(List::stream)
+                                                            .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaVectorPrinter.hasHideF0 : WekaVectorPrinter.hasNotHideF0);
+                                                    pw.println(frameDeltas);
 
 //                                            pw.println(p.stream()
 //                                                    .map(PitchValue::getCalculatedThreshold)
@@ -79,7 +95,7 @@ public class WekaVectorPrinter {
     private static void printHeader(PrintWriter pr, int numberOfFrames) {
         pr.println("@RELATION 'HideF0'");
         for (int i = 0; i < numberOfFrames * 4; i++) {
-            if (i % 4 == 1 || i % 4 == 2) {
+            if (i % 4 == 1 || i % 4 == 2 || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) && i % 4 == 3) {
                 pr.println("@ATTRIBUTE F" + i + " INTEGER");
             }
         }
@@ -90,7 +106,15 @@ public class WekaVectorPrinter {
     private static <T> Collection<List<T>> partition(List<T> list, int size) {
         Collection<List<T>> collection = new ArrayList<>();
         for (int i = 0; (i + size) < list.size(); i++) {
-            collection.add(list.subList(i, Math.min(i + size, list.size())));
+            if (i + size < list.size()) {
+                List<T> subList = new ArrayList<>(list.subList(i, i + size));
+                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) && i + size < list.size()) {
+                    subList.add(list.get(i + size));
+                    collection.add(subList);
+                } else if (!Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                    collection.add(subList);
+                }
+            }
         }
         return collection;
     }

@@ -22,7 +22,7 @@ public class HideF0EncoderFirstFirst extends HideF0Encoder {
     protected List<Pair<Integer, SpeexBits>> getPitches(List<SpeexBits> chunk, List<SpeexBits> nextChunk) {
         List<Pair<Integer, SpeexBits>> pitch = getPitches(chunk);
         pitch.addAll(getPitches(nextChunk));
-        return pitch.subList(0, 5);
+        return new ArrayList<>(pitch.subList(0, 5));
     }
 }
 

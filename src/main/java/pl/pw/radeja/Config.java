@@ -28,19 +28,18 @@ public final class Config {
     public static final int WEKA_FRAMES_PER_RECORD = 250;
     public static final boolean PRINT_CALCULATED_THRESHOLDS = false;
     public static final boolean PRINT_HISTOGRAM = false;
-    public static final HideF0Type HIDE_F0_TYPE = HideF0Type.FIRST_LAST;
+    public static final HideF0Type HIDE_F0_TYPE = HideF0Type.FIRST_FIRST;
 
-//        public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
-//public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5);
-//public static final List<Integer> THRESHOLDS = Arrays.asList(6, 7, 8, 9, 10, 15, 20);
-//public static final List<Integer> THRESHOLDS = Arrays.asList(25, 30, 35, 40, 45, 50, 60, 70);
-//    public static final List<Integer> THRESHOLDS = Arrays.asList(80, 90, 100, 110, 127);
-    public static final List<Integer> THRESHOLDS = Arrays.asList(5);
+//            public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
+//    public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8);
+//    public static final List<Integer> THRESHOLDS = Arrays.asList(9, 10, 15, 20, 25, 30, 35, 40, 45);
+    public static final List<Integer> THRESHOLDS = Arrays.asList(50, 60, 70, 80, 90, 100, 110, 127);
+//    public static final List<Integer> THRESHOLDS = Arrays.asList(45);
 
     public static List<String> getSamples() {
         final String baseMalePath = BASE_PATH.resolve("TIMIT_M").toAbsolutePath().toString() + '/';
         final String baseFemalePath = BASE_PATH.resolve("TIMIT_F").toAbsolutePath().toString() + '/';
-//        final int maleLimit = 2;
+//        final int maleLimit = 1;
         final int maleLimit = 25;
 //        final int femaleLimit = 1;
         final int femaleLimit = 25;
@@ -51,6 +50,7 @@ public final class Config {
         for (int i = 1; i < femaleLimit; i++) {
             samples.add(baseFemalePath + i);
         }
+//        samples.add(baseFemalePath + "24");
         return samples;
     }
 
@@ -58,10 +58,10 @@ public final class Config {
         List<Classifier> classifiers = new ArrayList<>();
 //        classifiers.add(new AdaBoostM1());
 //        classifiers.add(new Logistic());
-        classifiers.add(new MultilayerPerceptron());
-//        classifiers.add(new NaiveBayes());
+//        classifiers.add(new MultilayerPerceptron());
+        classifiers.add(new NaiveBayes());
 //        classifiers.add(new RandomForest());
-        classifiers.add(new SMO());
+//        classifiers.add(new SMO());
         return classifiers;
     }
 
@@ -88,8 +88,8 @@ public final class Config {
     }
 
     public static ExecutorService getExecutorService() {
-        return Executors.newFixedThreadPool(NUMBER_OF_THREADS);
-//        return Executors.newFixedThreadPool(2);
+//        return Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+        return Executors.newFixedThreadPool(2);
 //        return Executors.newSingleThreadExecutor();
     }
 }
