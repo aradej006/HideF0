@@ -6,6 +6,7 @@ import org.javatuples.Triplet;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.AudioFileWriter;
 import org.xiph.speex.Bits;
+import pl.pw.radeja.Config;
 import pl.pw.radeja.speex.result.BitsCollector;
 import pl.pw.radeja.speex.encoders.config.HideF0SpeexConfig;
 import pl.pw.radeja.speex.result.SpeexBitsName;
@@ -21,19 +22,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class HideF0Encoder {
     protected String path;
+    protected Config.HideF0Type type;
     protected Integer numberOfHiddenPositions = 0;
-    protected Integer hiddenPositionPerFrame = 0;
     protected PitchChanger pitchChanger;
     protected PitchCollector pitchCollector;
 
-    public HideF0Encoder(PitchChanger pitchChanger, String path) {
+    public HideF0Encoder(PitchChanger pitchChanger, String path, Config.HideF0Type type) {
         this.pitchChanger = pitchChanger;
+        this.type = type;
         this.path = path;
         this.pitchCollector = new PitchCollector(this.path, pitchChanger.getThreshold());
     }
 
     public void hide(BitsCollector bitsCollector) throws IOException {
-        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "-hide-" + pitchChanger.getThreshold() + ".spx"));
+        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "-hide-" + pitchChanger.getThreshold() + "_" + type.getName() + ".spx"));
         Map<Integer, List<SpeexBits>> chunks = getChunks(bitsCollector);
         for (int i = 2; i <= chunks.size(); i++) {
             List<SpeexBits> chunk = chunks.get(i - 1);
@@ -87,13 +89,14 @@ public abstract class HideF0Encoder {
         List<Pair<Integer, SpeexBits>> pitch = getPitches(chunk, nextChunk);
         // change: PitchChanger
         List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getBitsData()).collect(Collectors.toList());
-        List<Integer> newPitches = pitchChanger.change(pitchValues);
+        List<Integer> newPitches = pitchChanger.change(pitchValues, false);
         boolean changed = false;
         int calculatedThreshold = pitchChanger.calculateThreshold(pitchValues);
         int calculatedThresholdAfterHideF0 = pitchChanger.calculateThreshold(newPitches);
         if (pitchChanger.shouldChange(pitchValues)) {
             changed = true;
-            numberOfHiddenPositions += hiddenPositionPerFrame;
+            pitchChanger.change(pitchValues, true);
+            numberOfHiddenPositions += pitchChanger.getNumberOfHiddenPositions(pitchValues);
             for (int i = 0; i < 4; i++) {
                 Pair<Integer, SpeexBits> pair = pitch.get(i);
                 chunk.set(pair.getValue0(), pair.getValue1().setBitsData(newPitches.get(i)));

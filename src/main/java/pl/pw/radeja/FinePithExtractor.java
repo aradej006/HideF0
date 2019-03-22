@@ -51,7 +51,7 @@ public class FinePithExtractor {
         // decoding
         if (Config.DECODE_FILES) {
             List<String> filesToDecode = new ArrayList<>();
-            Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToDecode.add(s + "-hide-" + t)));
+            Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToDecode.add(s + "-hide-" + t + "_" + Config.HIDE_F0_TYPE.getName())));
             runDecoding(filesToDecode);
         }
 
@@ -62,7 +62,7 @@ public class FinePithExtractor {
             Config.getSamples().forEach(s -> Config.THRESHOLDS.forEach(t -> filesToPesq.add(
                     new PesqFiles(
                             s + ".wav",
-                            s + "-hide-" + t + "-dec-" + Config.HIDE_F0_TYPE.getName() + ".wav"
+                            s + "-hide-" + t + "_" + Config.HIDE_F0_TYPE.getName() + "-dec.wav"
                     ))));
             pesqResults = PesqRunner.run(filesToPesq);
         }
@@ -104,13 +104,13 @@ public class FinePithExtractor {
         log.info("Total time:" + stopWatch.toString());
     }
 
-    private static JSpeexEnc getSpeexEncoder(final HideF0Encoder hideF0Encoder) {
+    public static JSpeexEnc getSpeexEncoder(final HideF0Encoder hideF0Encoder) {
         @NotNull JSpeexEnc enc = new JSpeexEnc(hideF0Encoder);
         enc.srcFile = hideF0Encoder.getPath() + ".wav";
         enc.destFile = hideF0Encoder.getPath() + "-pitch.spx";
         enc.srcFormat = JSpeexEnc.FILE_FORMAT_WAVE;
         enc.destFormat = JSpeexEnc.FILE_FORMAT_OGG;
-        enc.printlevel = JSpeexEnc.ERROR;
+        enc.printlevel = JSpeexEnc.DEBUG;
         enc.mode = 0;
         enc.sampleRate = 8000;
         enc.channels = 1;
@@ -118,10 +118,10 @@ public class FinePithExtractor {
         return enc;
     }
 
-    private static JSpeexDec getSpeexDecoder(final String filename) {
+    public static JSpeexDec getSpeexDecoder(final String filename) {
         @NotNull JSpeexDec dec = new JSpeexDec();
         dec.srcFile = filename + ".spx";
-        dec.destFile = filename + "-dec-" + Config.HIDE_F0_TYPE.getName() + ".wav";
+        dec.destFile = filename + "-dec.wav";
         dec.srcFormat = JSpeexDec.FILE_FORMAT_OGG;
         dec.destFormat = JSpeexDec.FILE_FORMAT_WAVE;
         dec.printlevel = JSpeexDec.ERROR;
@@ -171,6 +171,8 @@ public class FinePithExtractor {
             encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(threshold, path));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
             encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold, path));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstMiddle(threshold, path));
         } else {
             throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
         }

@@ -1,6 +1,8 @@
 package pl.pw.radeja.speex.pitch.collectors;
 
 
+import pl.pw.radeja.Config;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +37,6 @@ public class PitchCollector {
     }
 
     public String getSampleName() {
-        String temp = path.split("TIMIT_")[1];
-        return temp.charAt(0) + temp.split("-")[0].substring(2);
+        return Config.getSampleNameFromPath(path);
     }
 }

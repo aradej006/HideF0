@@ -15,7 +15,7 @@ public abstract class PitchChanger {
         this.threshold = threshold;
     }
 
-    public abstract List<Integer> change(List<Integer> pitches);
+    public abstract List<Integer> change(List<Integer> pitches, boolean shouldLog);
 
     public abstract boolean shouldChange(List<Integer> pitches);
 
@@ -36,4 +36,6 @@ public abstract class PitchChanger {
     static String pitchesToString(List<Integer> pitches) {
         return pitches.stream().map(Objects::toString).collect(Collectors.joining(";"));
     }
+
+    public abstract Integer getNumberOfHiddenPositions(List<Integer> pitches);
 }

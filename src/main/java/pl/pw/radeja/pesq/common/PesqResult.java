@@ -1,5 +1,7 @@
 package pl.pw.radeja.pesq.common;
 
+import pl.pw.radeja.Config;
+
 public class PesqResult {
     private PesqFiles pesqFiles;
     private Float rawMos;
@@ -24,11 +26,10 @@ public class PesqResult {
     }
 
     public String getSampleName() {
-        String temp = pesqFiles.getPathToDegraded().split("TIMIT_")[1];
-        return temp.charAt(0) + temp.split("-")[0].substring(2);
+        return Config.getSampleNameFromPath(pesqFiles.getPathToDegraded());
     }
 
     public Integer getSampleThreshold() {
-        return Integer.parseInt(pesqFiles.getPathToDegraded().split("-")[3]);
+        return Integer.parseInt(pesqFiles.getPathToDegraded().split("-")[3].split("_")[0]);
     }
 }

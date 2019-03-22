@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.xiph.speex.Bits;
+import pl.pw.radeja.Config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,6 @@ public final class BitsCollector {
     }
 
     public String getSampleName() {
-        String temp = path.split("TIMIT_")[1];
-        return temp.charAt(0) + temp.split("-")[0].substring(2);
+        return Config.getSampleNameFromPath(path);
     }
 }

@@ -13,7 +13,7 @@ public class LinearApproximateChanger extends PitchChanger {
     }
 
     @Override
-    public List<Integer> change(List<Integer> pitches) {
+    public List<Integer> change(List<Integer> pitches, boolean shouldLog) {
         if (pitches == null) {
             throw new IllegalArgumentException("Pitches cannot be null.");
         } else if (pitches.size() < 3) {
@@ -25,7 +25,9 @@ public class LinearApproximateChanger extends PitchChanger {
         for (int i = 0; i < 4; i++) {
             result.add(LinearApprox(first, last, pitches.size(), i));
         }
-        log.debug("Pitches changed form {} to {}", pitchesToString(pitches), pitchesToString(result));
+        if (shouldLog) {
+            log.debug("Pitches changed form {} to {}", pitchesToString(pitches), pitchesToString(result));
+        }
         return result;
     }
 
@@ -49,5 +51,10 @@ public class LinearApproximateChanger extends PitchChanger {
 
     boolean isLinear(List<Integer> pitches) {
         return shouldChange(pitches, 0);
+    }
+
+    @Override
+    public Integer getNumberOfHiddenPositions(List<Integer> pitches) {
+        return pitches.size() - 2;
     }
 }

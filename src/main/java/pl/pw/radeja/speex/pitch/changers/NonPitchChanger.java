@@ -9,12 +9,17 @@ public class NonPitchChanger extends PitchChanger {
     }
 
     @Override
-    public List<Integer> change(List<Integer> pitches) {
+    public List<Integer> change(List<Integer> pitches, boolean shouldLog) {
         return pitches;
     }
 
     @Override
     public boolean shouldChange(List<Integer> pitches) {
         return false;
+    }
+
+    @Override
+    public Integer getNumberOfHiddenPositions(List<Integer> pitches) {
+        return 0;
     }
 }

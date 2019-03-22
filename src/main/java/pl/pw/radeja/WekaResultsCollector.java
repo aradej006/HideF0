@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static pl.pw.radeja.Config.*;
@@ -26,6 +25,7 @@ public class WekaResultsCollector {
     static String testExt = "-" + WEKA_FRAMES_PER_RECORD + "-test.arff";
 
     public static void main(@NotNull final String[] args) throws InterruptedException {
+
         Map<String, List<WekaResult>> resultsMap = new HashMap<>();
         if (PRINT_WEKA_FILES) {
             String pathFL = BASE_PATH.resolve("weka" + HIDE_F0_TYPE.getName()).toAbsolutePath().toString() + "/hideF0-";
@@ -63,6 +63,7 @@ public class WekaResultsCollector {
 
         stopWatch.stop();
         log.info("\n\nTotal time:" + (stopWatch.getTime() / 1000) + "[s]");
+
     }
 
     private static void runMachineLearning(String path, List<WekaResult> results) throws InterruptedException {

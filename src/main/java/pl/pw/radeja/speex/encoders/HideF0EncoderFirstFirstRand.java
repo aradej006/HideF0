@@ -6,6 +6,6 @@ public class HideF0EncoderFirstFirstRand extends HideF0EncoderFirstFirst {
 
     public HideF0EncoderFirstFirstRand(int threshold, String path) {
         super(new LinearApproximateRand(threshold, 1L), path);
-        hiddenPositionPerFrame = 2;
+        this.type = null;
     }
 }

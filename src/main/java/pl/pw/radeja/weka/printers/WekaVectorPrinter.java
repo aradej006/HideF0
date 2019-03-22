@@ -50,7 +50,9 @@ public class WekaVectorPrinter {
                                         partition(pitchCollector.getFramePitchValues(), numberOfFrames)
                                                 .stream()
                                                 .map(windowFrames -> {
-                                                    if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                                                    if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) ||
+                                                            Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE) ||
+                                                            Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE_RAND)) {
                                                         for (int i = 0; i < numberOfFrames; i++) {
                                                             if (windowFrames.get(i).getPitchValues().size() < 5) {
                                                                 windowFrames.get(i).getPitchValues().add(windowFrames.get(i + 1).getPitchValues().get(0));
@@ -66,12 +68,23 @@ public class WekaVectorPrinter {
                                                     String frameDeltas = p.stream()
                                                             .map(framePitchValues -> {
                                                                 List<Integer> delta = new ArrayList<>();
-                                                                int first = framePitchValues.getPitchValues().get(0);
-                                                                int last = framePitchValues.getPitchValues().get(framePitchValues.getPitchValues().size() - 1);
-                                                                delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
-                                                                delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
-                                                                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                                                                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST) || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
+                                                                    int first = framePitchValues.getPitchValues().get(0);
+                                                                    int last = framePitchValues.getPitchValues().get(framePitchValues.getPitchValues().size() - 1);
+                                                                    delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
+                                                                    delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
+                                                                } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                                                                    int first = framePitchValues.getPitchValues().get(0);
+                                                                    int last = framePitchValues.getPitchValues().get(framePitchValues.getPitchValues().size() - 1);
+                                                                    delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 1) - framePitchValues.getPitchValues().get(1));
+                                                                    delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 2) - framePitchValues.getPitchValues().get(2));
                                                                     delta.add(PitchChanger.LinearApprox(first, last, framePitchValues.getPitchValues().size(), 3) - framePitchValues.getPitchValues().get(3));
+                                                                } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE) || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE_RAND)) {
+                                                                    int first = framePitchValues.getPitchValues().get(0);
+                                                                    int middle = framePitchValues.getPitchValues().get(2);
+                                                                    int last = framePitchValues.getPitchValues().get(4);
+                                                                    delta.add(PitchChanger.LinearApprox(first, middle, 3, 1) - framePitchValues.getPitchValues().get(1));
+                                                                    delta.add(PitchChanger.LinearApprox(middle, last, 3, 1) - framePitchValues.getPitchValues().get(3));
                                                                 }
                                                                 return delta.stream().map(Math::abs).map(Objects::toString).collect(Collectors.toList());
                                                             })
@@ -95,8 +108,18 @@ public class WekaVectorPrinter {
     private static void printHeader(PrintWriter pr, int numberOfFrames) {
         pr.println("@RELATION 'HideF0'");
         for (int i = 0; i < numberOfFrames * 4; i++) {
-            if (i % 4 == 1 || i % 4 == 2 || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) && i % 4 == 3) {
-                pr.println("@ATTRIBUTE F" + i + " INTEGER");
+            if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                if (i % 4 != 0) {
+                    pr.println("@ATTRIBUTE F" + i + " INTEGER");
+                }
+            } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST) || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
+                if (i % 4 == 1 || i % 4 == 2) {
+                    pr.println("@ATTRIBUTE F" + i + " INTEGER");
+                }
+            } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE) || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE_RAND)) {
+                if (i % 4 == 1 || i % 4 == 3) {
+                    pr.println("@ATTRIBUTE F" + i + " INTEGER");
+                }
             }
         }
         pr.println("@ATTRIBUTE class {" + hasHideF0 + "," + hasNotHideF0 + "}");
@@ -108,10 +131,14 @@ public class WekaVectorPrinter {
         for (int i = 0; (i + size) < list.size(); i++) {
             if (i + size < list.size()) {
                 List<T> subList = new ArrayList<>(list.subList(i, i + size));
-                if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) && i + size < list.size()) {
+                if ((Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) ||
+                        Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE) ||
+                        Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE_RAND)) && i + size < list.size()) {
                     subList.add(list.get(i + size));
                     collection.add(subList);
-                } else if (!Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
+                } else if (!(Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST) ||
+                        Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE) ||
+                        Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE_RAND))) {
                     collection.add(subList);
                 }
             }
