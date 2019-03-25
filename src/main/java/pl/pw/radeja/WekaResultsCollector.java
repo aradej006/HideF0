@@ -94,10 +94,9 @@ public class WekaResultsCollector {
                 eval.evaluateModel(classifier, test);
                 WekaResult result = new WekaResult(eval, classifier, path);
                 results.add(result);
-                log.info("Evaluated for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
                 log.debug("Result:\t" + result.getPtcCorrect() + "\t" + result.getRocArea());
                 stopWatch.stop();
-                log.info("Total time:" + (stopWatch.getTime() / 1000) + "[s]\n\n");
+                log.info("Total time:" + (stopWatch.getTime() / 1000) + "[s]\t" + "Evaluated for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
             } catch (Exception e) {
                 e.printStackTrace();
             }

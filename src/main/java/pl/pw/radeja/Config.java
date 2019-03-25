@@ -21,7 +21,6 @@ import java.util.concurrent.Executors;
 
 public final class Config {
     public static final Path BASE_PATH = Paths.get("");
-    public static final Path CUT_PATH = Paths.get("").resolve("CutSamples");
     public static final Path HUMAN_SAMPLE = Paths.get("").resolve("HumanTestSamples");
     public static final int NUMBER_OF_THREADS = Runtime.getRuntime().availableProcessors();
     public static final boolean CALCULATE_ALLOW_PLACES = false;
@@ -32,13 +31,13 @@ public final class Config {
     public static final int WEKA_FRAMES_PER_RECORD = 250;
     public static final boolean PRINT_CALCULATED_THRESHOLDS = false;
     public static final boolean PRINT_HISTOGRAM = false;
-    public static final HideF0Type HIDE_F0_TYPE = HideF0Type.FIRST_MIDDLE;
+    public static final HideF0Type HIDE_F0_TYPE = HideF0Type.FIRST_FIRST_RAND;
 
-//    public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
+//        public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
 //    public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8);
 //    public static final List<Integer> THRESHOLDS = Arrays.asList(9, 10, 15, 20, 25, 30, 35, 40, 45);
     public static final List<Integer> THRESHOLDS = Arrays.asList(50, 60, 70, 80, 90, 100, 110, 127);
-//    public static final List<Integer> THRESHOLDS = Arrays.asList(0);
+//    public static final List<Integer> THRESHOLDS = Arrays.asList(127);
 
     public static List<String> getSamples() {
         final String baseMalePath = BASE_PATH.resolve("TIMIT_M").toAbsolutePath().toString() + '/';
@@ -84,6 +83,20 @@ public final class Config {
         samples.add(new HumanSample(femalePath + "DR1_FDAC1_SI844", 5f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(femalePath + "DR1_FELC0_SI1386", 15f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(femalePath + "DR2_FCMR0_SX205", 30f, HideF0Type.FIRST_FIRST));
+
+        samples.add(new HumanSample(femalePath + "DR2_FJAS0_SI770", 0f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(femalePath + "DR2_FJWB0_SI992", 1f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(femalePath + "DR2_FJWB0_SX365", 2f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(femalePath + "DR2_FPAS0_SI2204", 3f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(femalePath + "DR2_FRAM1_SX190", 9f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(femalePath + "DR2_FRAM1_SX370", 20f, HideF0Type.FIRST_MIDDLE));
+
+        samples.add(new HumanSample(femalePath + "DR1_FEJM0_SI634", 0f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FCMR0_SI1105", 2f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FJAS0_SI770", 8f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FJRE0_SI1587", 15f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FRAM1_SI730", 25f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FSLB1_SI891", 50f, HideF0Type.FIRST_MIDDLE_RAND));
 //        Male
         samples.add(new HumanSample(malePath + "DR1_MDAB0_SI1039", 0f, HideF0Type.FIRST_LAST));
         samples.add(new HumanSample(malePath + "DR1_MJSW0_SA1", 4f, HideF0Type.FIRST_LAST));
@@ -105,15 +118,29 @@ public final class Config {
         samples.add(new HumanSample(malePath + "DR1_MRJO0_SI734", 5f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(malePath + "DR1_MJSW0_SX380", 15f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(malePath + "DR1_MDAB0_SI1039", 30f, HideF0Type.FIRST_FIRST));
+
+        samples.add(new HumanSample(malePath + "DR2_MBJK0_SI2128", 0f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(malePath + "DR2_MDLD0_SI913", 1f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(malePath + "DR2_MRCZ0_SI1541", 2f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(malePath + "DR2_MRCZ0_SX101", 3f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(malePath + "DR2_MWEW0_SI1991", 9f, HideF0Type.FIRST_MIDDLE));
+        samples.add(new HumanSample(malePath + "DR2_MWVW0_SI846", 20f, HideF0Type.FIRST_MIDDLE));
+
+        samples.add(new HumanSample(malePath + "DR1_MREB0_SI1375", 0f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MMDM2_SI1452", 2f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MRCZ0_SX101", 8f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MRGG0_SI1829", 15f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MTAS1_SX388", 25f, HideF0Type.FIRST_MIDDLE_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MWEW0_SI1991", 50f, HideF0Type.FIRST_MIDDLE_RAND));
         return samples;
     }
 
     public static List<Classifier> getWekaClassifiers() {
         List<Classifier> classifiers = new ArrayList<>();
 //        classifiers.add(new AdaBoostM1());
-        classifiers.add(new Logistic());
+//        classifiers.add(new Logistic());
 //        classifiers.add(new NaiveBayes());
-//        classifiers.add(new RandomForest());
+        classifiers.add(new RandomForest());
         return classifiers;
     }
 
@@ -125,6 +152,7 @@ public final class Config {
         FIRST_LAST("FL", "VectorFL"),
         FIRST_LAST_RAND("FLRand", "VectorFLRand"),
         FIRST_FIRST("FF", "VectorFF"),
+        FIRST_FIRST_RAND("FFRand", "VectorFFRand"),
         FIRST_MIDDLE("FM", "VectorFM"),
         FIRST_MIDDLE_RAND("FMRand", "VectorFMRand");
 
@@ -151,8 +179,9 @@ public final class Config {
     }
 
     public static ExecutorService getExecutorService() {
-//        return Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+//        return Executors.newFixedThreadPool(NUMBER_OF_THREADS - 1);
         return Executors.newFixedThreadPool(2);
+//        return Executors.newFixedThreadPool(4);
 //        return Executors.newSingleThreadExecutor();
     }
 }

@@ -110,7 +110,7 @@ public class FinePithExtractor {
         enc.destFile = hideF0Encoder.getPath() + "-pitch.spx";
         enc.srcFormat = JSpeexEnc.FILE_FORMAT_WAVE;
         enc.destFormat = JSpeexEnc.FILE_FORMAT_OGG;
-        enc.printlevel = JSpeexEnc.DEBUG;
+        enc.printlevel = JSpeexEnc.ERROR;
         enc.mode = 0;
         enc.sampleRate = 8000;
         enc.channels = 1;
@@ -169,10 +169,14 @@ public class FinePithExtractor {
             encoder = getSpeexEncoder(new HideF0EncoderFirstLast(threshold, path));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST)) {
             encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(threshold, path));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_FIRST_RAND)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstFirstRand(threshold, path));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
             encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold, path));
         } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE)) {
             encoder = getSpeexEncoder(new HideF0EncoderFirstMiddle(threshold, path));
+        } else if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_MIDDLE_RAND)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstMiddleRand(threshold, path));
         } else {
             throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
         }

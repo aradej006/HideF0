@@ -5,10 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import pl.pw.radeja.Config;
 import pl.pw.radeja.JSpeexDec;
 import pl.pw.radeja.JSpeexEnc;
-import pl.pw.radeja.speex.encoders.HideF0Encoder;
-import pl.pw.radeja.speex.encoders.HideF0EncoderFirstFirst;
-import pl.pw.radeja.speex.encoders.HideF0EncoderFirstLast;
-import pl.pw.radeja.speex.encoders.HideF0EncoderFirstLastRand;
+import pl.pw.radeja.speex.encoders.*;
 import pl.pw.radeja.speex.result.AllowPlaces;
 import pl.pw.radeja.speex.result.BitsCollector;
 import pl.pw.radeja.speex.result.SampleResult;
@@ -68,6 +65,10 @@ public class HumanSampleGenerator {
             encoder = getSpeexEncoder(new HideF0EncoderFirstFirst(threshold.intValue(), path));
         } else if (type.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
             encoder = getSpeexEncoder(new HideF0EncoderFirstLastRand(threshold.intValue(), path));
+        } else if (type.equals(Config.HideF0Type.FIRST_MIDDLE)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstMiddle(threshold.intValue(), path));
+        } else if (type.equals(Config.HideF0Type.FIRST_MIDDLE_RAND)) {
+            encoder = getSpeexEncoder(new HideF0EncoderFirstMiddleRand(threshold.intValue(), path));
         } else {
             throw new Error("Add HideF0Encoder to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
         }
