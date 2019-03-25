@@ -31,13 +31,15 @@ public final class Config {
     public static final int WEKA_FRAMES_PER_RECORD = 250;
     public static final boolean PRINT_CALCULATED_THRESHOLDS = false;
     public static final boolean PRINT_HISTOGRAM = false;
+    public static final boolean PRINT_WEKA_HISTOGRAM = true;
+    public static final int WEKA_BYTES_WINDOW = 250;
     public static final HideF0Type HIDE_F0_TYPE = HideF0Type.FIRST_FIRST_RAND;
 
 //        public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 110, 127);
 //    public static final List<Integer> THRESHOLDS = Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8);
 //    public static final List<Integer> THRESHOLDS = Arrays.asList(9, 10, 15, 20, 25, 30, 35, 40, 45);
-    public static final List<Integer> THRESHOLDS = Arrays.asList(50, 60, 70, 80, 90, 100, 110, 127);
-//    public static final List<Integer> THRESHOLDS = Arrays.asList(127);
+//    public static final List<Integer> THRESHOLDS = Arrays.asList(50, 60, 70, 80, 90, 100, 110, 127);
+    public static final List<Integer> THRESHOLDS = Arrays.asList(0, 50);
 
     public static List<String> getSamples() {
         final String baseMalePath = BASE_PATH.resolve("TIMIT_M").toAbsolutePath().toString() + '/';
@@ -84,6 +86,13 @@ public final class Config {
         samples.add(new HumanSample(femalePath + "DR1_FELC0_SI1386", 15f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(femalePath + "DR2_FCMR0_SX205", 30f, HideF0Type.FIRST_FIRST));
 
+        samples.add(new HumanSample(femalePath + "DR2_FCMR0_SX205", 0f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FJWB0_SX365", 25f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FJAS0_SI770", 30f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(femalePath + "DR2_FJRE0_SI1587", 35f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(femalePath + "DR1_FEJM0_SI634", 40f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(femalePath + "DR1_FAKS0_SI1573", 60f, HideF0Type.FIRST_FIRST_RAND));
+
         samples.add(new HumanSample(femalePath + "DR2_FJAS0_SI770", 0f, HideF0Type.FIRST_MIDDLE));
         samples.add(new HumanSample(femalePath + "DR2_FJWB0_SI992", 1f, HideF0Type.FIRST_MIDDLE));
         samples.add(new HumanSample(femalePath + "DR2_FJWB0_SX365", 2f, HideF0Type.FIRST_MIDDLE));
@@ -118,6 +127,13 @@ public final class Config {
         samples.add(new HumanSample(malePath + "DR1_MRJO0_SI734", 5f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(malePath + "DR1_MJSW0_SX380", 15f, HideF0Type.FIRST_FIRST));
         samples.add(new HumanSample(malePath + "DR1_MDAB0_SI1039", 30f, HideF0Type.FIRST_FIRST));
+
+        samples.add(new HumanSample(malePath + "DR1_MREB0_SX205", 0f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MRGG0_SI1829", 25f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(malePath + "DR1_MRJO0_SI734", 30f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MRCZ0_SX101", 35f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(malePath + "DR1_MRJO0_SI1364", 40f, HideF0Type.FIRST_FIRST_RAND));
+        samples.add(new HumanSample(malePath + "DR2_MRCZ0_SI1541", 60f, HideF0Type.FIRST_FIRST_RAND));
 
         samples.add(new HumanSample(malePath + "DR2_MBJK0_SI2128", 0f, HideF0Type.FIRST_MIDDLE));
         samples.add(new HumanSample(malePath + "DR2_MDLD0_SI913", 1f, HideF0Type.FIRST_MIDDLE));

@@ -6,10 +6,8 @@ import pl.pw.radeja.Config;
 import pl.pw.radeja.speex.pitch.collectors.PitchCollector;
 import pl.pw.radeja.speex.pitch.collectors.PitchValue;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -22,9 +20,6 @@ import static pl.pw.radeja.Config.BASE_PATH;
 
 public final class WekaPrinter {
     private final static String filePath = BASE_PATH.resolve("weka" + Config.HIDE_F0_TYPE.getName()).toAbsolutePath().toString() + "/hideF0-";
-    private final static String extension = ".arff";
-    private final static String hasHideF0 = "HideF0";
-    private final static String hasNotHideF0 = "NoHideF0";
     private final static DoubleFFT_1D FFT = new DoubleFFT_1D(4);
     private final static Long seed = 1L;
     private final static Random rand = new Random(seed);
@@ -43,10 +38,10 @@ public final class WekaPrinter {
                                        Predicate<List<PitchValue>> hasHideF0Saver) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
-                Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + extension);
+                Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + WekaEnum.EXTENSION);
                 Files.createDirectories(path.getParent());
                 PrintWriter pw = new PrintWriter(path.toFile(), "UTF-8");
-                Path pathFft = Paths.get(filePath + threshold + "-fft-" + numberOfFrames + '-' + name + extension);
+                Path pathFft = Paths.get(filePath + threshold + "-fft-" + numberOfFrames + '-' + name + WekaEnum.EXTENSION);
                 Files.createDirectories(pathFft.getParent());
                 PrintWriter pwFft = new PrintWriter(pathFft.toFile(), "UTF-8");
                 printHeader(pw, numberOfFrames);
@@ -68,12 +63,12 @@ public final class WekaPrinter {
                                             pw.println(p.stream()
                                                     .flatMap(pitchValue -> pitchValue.getPitchValues().stream())
                                                     .map(Objects::toString)
-                                                    .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaPrinter.hasHideF0 : WekaPrinter.hasNotHideF0));
+                                                    .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaEnum.HIDE_F0.getHasHideF0() : WekaEnum.NO_HIDE_F0.getHasHideF0()));
                                             //print Fourier Transform values
                                             pwFft.println(fftPitchValues.stream()
                                                     .map(Complex::abs)
                                                     .map(Objects::toString)
-                                                    .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaPrinter.hasHideF0 : WekaPrinter.hasNotHideF0));
+                                                    .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaEnum.HIDE_F0.getHasHideF0() : WekaEnum.NO_HIDE_F0.getHasHideF0()));
                                         })
                         );
                 pw.close();
@@ -89,7 +84,7 @@ public final class WekaPrinter {
         for (int i = 0; i < (numberOfFrames * 4); i++) {
             pr.println("@ATTRIBUTE F" + (i / 4) + "_P" + (i % 4) + " INTEGER");
         }
-        pr.println("@ATTRIBUTE class {" + hasHideF0 + "," + hasNotHideF0 + "}");
+        pr.println("@ATTRIBUTE class {" + WekaEnum.HIDE_F0.getHasHideF0() + "," + WekaEnum.NO_HIDE_F0.getHasHideF0() + "}");
         pr.println("@DATA");
     }
 
@@ -99,7 +94,7 @@ public final class WekaPrinter {
             pr.println("@ATTRIBUTE F" + (i / 4) + "_P_ABS_" + (i % 4) + " NUMERIC");
             pr.println("@ATTRIBUTE F" + (i / 4) + "_P_ARG_" + (i % 4) + " NUMERIC");
         }
-        pr.println("@ATTRIBUTE class {" + hasHideF0 + "," + hasNotHideF0 + "}");
+        pr.println("@ATTRIBUTE class {" + WekaEnum.HIDE_F0.getHasHideF0() + "," + WekaEnum.NO_HIDE_F0.getHasHideF0() + "}");
         pr.println("@DATA");
     }
 

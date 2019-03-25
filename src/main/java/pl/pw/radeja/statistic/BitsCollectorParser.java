@@ -10,10 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class BitsCollectorParser {
+public class BitsCollectorParser {
 
     static Map<Integer, Long> getHistogramData(BitsCollector bitsCollector) {
         return buildIntByteList(splitToBytes(buildBits(bitsCollector.getBitsToSave()))).stream().collect(Collectors.groupingBy(e -> e, Collectors.counting()));
+    }
+
+    public static List<Integer> bitsCollectorToIntByteList(BitsCollector bitsCollector) {
+        return buildIntByteList(splitToBytes(buildBits(bitsCollector.getBitsToSave())));
     }
 
     private static String buildBits(List<SpeexBits> speexBitsList) {

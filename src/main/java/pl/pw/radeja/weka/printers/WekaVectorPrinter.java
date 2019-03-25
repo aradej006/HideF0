@@ -20,11 +20,6 @@ import static pl.pw.radeja.Config.BASE_PATH;
 
 public class WekaVectorPrinter {
     private final static String filePath = BASE_PATH.resolve("weka" + Config.HIDE_F0_TYPE.getVectorName()) + "/hideF0-";
-    private final static String extension = ".arff";
-    private final static String hasHideF0 = "HideF0";
-    private final static String hasNotHideF0 = "NoHideF0";
-    private final static Long seed = 1L;
-    private final static Random rand = new Random(seed);
 
     public static void print(List<PitchCollector> pitchCollectors, int numberOfFrames) {
         Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
@@ -39,7 +34,7 @@ public class WekaVectorPrinter {
                                        BiPredicate<List<PitchValue>, PitchCollector> hasHideF0Saver) {
         thresholdToPitchCollector.forEach((threshold, pitchCollectorList) -> {
             try {
-                Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + extension);
+                Path path = Paths.get(filePath + threshold + "-" + numberOfFrames + '-' + name + WekaEnum.EXTENSION);
                 Files.createDirectories(path.getParent());
                 PrintWriter pw = new PrintWriter(path.toFile(), "UTF-8");
                 printHeader(pw, numberOfFrames);
@@ -89,7 +84,7 @@ public class WekaVectorPrinter {
                                                                 return delta.stream().map(Math::abs).map(Objects::toString).collect(Collectors.toList());
                                                             })
                                                             .flatMap(List::stream)
-                                                            .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaVectorPrinter.hasHideF0 : WekaVectorPrinter.hasNotHideF0);
+                                                            .collect(Collectors.joining(",")) + "," + (hasHideF0 ? WekaEnum.HIDE_F0.getHasHideF0() : WekaEnum.NO_HIDE_F0.getHasHideF0());
                                                     pw.println(frameDeltas);
 
 //                                            pw.println(p.stream()
@@ -122,7 +117,7 @@ public class WekaVectorPrinter {
                 }
             }
         }
-        pr.println("@ATTRIBUTE class {" + hasHideF0 + "," + hasNotHideF0 + "}");
+        pr.println("@ATTRIBUTE class {" + WekaEnum.HIDE_F0.getHasHideF0() + "," + WekaEnum.NO_HIDE_F0.getHasHideF0() + "}");
         pr.println("@DATA");
     }
 
@@ -148,8 +143,8 @@ public class WekaVectorPrinter {
         return collection;
     }
 
-    private static final Predicate<PitchCollector> isTraining = (p) -> getTrainingSet().contains(p.getSampleName());
-    private static final BiPredicate<List<PitchValue>, PitchCollector> hasHideF0SaverTraining = (p, collector) -> {
+    public static final Predicate<PitchCollector> isTraining = (p) -> getTrainingSet().contains(p.getSampleName());
+    public static final BiPredicate<List<PitchValue>, PitchCollector> hasHideF0SaverTraining = (p, collector) -> {
 //        boolean isChanged = p.stream().anyMatch(PitchValue::isChanged);
 //        long thZeroCount = p.stream().filter(v -> v.getCalculatedThreshold() == 0).count();
 //        if (thZeroCount > 0 && rand.nextInt(100) < Config.WEKA_TRAINING_TH_0_RAND * 100) {
@@ -160,8 +155,8 @@ public class WekaVectorPrinter {
 //        }
         return WekaVectorPrinter.TRAINING_SET_HIDE_FO.contains(collector.getSampleName());
     };
-    private static final Predicate<PitchCollector> isTest = (p) -> getTestSet().contains(p.getSampleName());
-    private static final BiPredicate<List<PitchValue>, PitchCollector> hasHideF0SaverTest = (p, collector) -> {
+    public static final Predicate<PitchCollector> isTest = (p) -> getTestSet().contains(p.getSampleName());
+    public static final BiPredicate<List<PitchValue>, PitchCollector> hasHideF0SaverTest = (p, collector) -> {
 //        p.stream().anyMatch(PitchValue::isChanged)
         return WekaVectorPrinter.TEST_SET_HIDE_FO.contains(collector.getSampleName());
     };

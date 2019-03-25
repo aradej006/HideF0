@@ -35,7 +35,8 @@ public abstract class HideF0Encoder {
     }
 
     public void hide(BitsCollector bitsCollector) throws IOException {
-        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "-hide-" + pitchChanger.getThreshold() + "_" + type.getName() + ".spx"));
+//        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "-hide-" + pitchChanger.getThreshold() + "_" + type.getName() + ".spx"));
+        AudioFileWriter writer = HideF0SpeexConfig.getAudioFileWriter(new File(path + "_" + pitchChanger.getThreshold() + "_" + type.getName() + ".spx"));
         Map<Integer, List<SpeexBits>> chunks = getChunks(bitsCollector);
         for (int i = 2; i <= chunks.size(); i++) {
             List<SpeexBits> chunk = chunks.get(i - 1);

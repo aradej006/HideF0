@@ -15,6 +15,7 @@ import pl.pw.radeja.speex.result.AllowPlacesPrint;
 import pl.pw.radeja.speex.result.BitsCollector;
 import pl.pw.radeja.speex.result.SampleResult;
 import pl.pw.radeja.statistic.BytesHistogramPrinter;
+import pl.pw.radeja.weka.printers.WekaHistogramVectorPrinter;
 import pl.pw.radeja.weka.printers.WekaPrinter;
 import pl.pw.radeja.weka.printers.WekaVectorPrinter;
 
@@ -26,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -44,7 +44,7 @@ public class FinePithExtractor {
         if (Config.CALCULATE_ALLOW_PLACES) {
             result = calculate(false);
         }
-        if (Config.PRINT_WEKA_FILES || Config.PRINT_WEKA_VECTOR_FILES) {
+        if (Config.PRINT_WEKA_FILES || Config.PRINT_WEKA_VECTOR_FILES || Config.PRINT_WEKA_HISTOGRAM) {
             wekaResults = calculate(true);
         }
 
@@ -74,7 +74,7 @@ public class FinePithExtractor {
                     PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch-" + pitchCollector.getThreshold() + ".txt", "UTF-8");
                     PitchCollectorPrint.print(pitchCollector.getFramePitchValues(), printWriter, false).close();
                 } catch (FileNotFoundException | UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
 
             });
@@ -98,6 +98,9 @@ public class FinePithExtractor {
         }
         if (Config.PRINT_HISTOGRAM) {
             BytesHistogramPrinter.printHistograms(result.stream().map(SampleResult::getBitsCollector).collect(Collectors.toList()));
+        }
+        if (Config.PRINT_WEKA_HISTOGRAM) {
+            WekaHistogramVectorPrinter.generateHistogramData(wekaResults.stream().map(SampleResult::getBitsCollector).collect(Collectors.toList()), Config.WEKA_BYTES_WINDOW);
         }
 
         stopWatch.stop();

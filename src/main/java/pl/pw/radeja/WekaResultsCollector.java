@@ -35,6 +35,10 @@ public class WekaResultsCollector {
             String pathFLRand = BASE_PATH.resolve("weka" + HIDE_F0_TYPE.getVectorName()).toAbsolutePath().toString() + "/hideF0-";
             resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
         }
+        if (PRINT_WEKA_HISTOGRAM) {
+            String pathFLRand = BASE_PATH.resolve("wekaHistogram" + HIDE_F0_TYPE.getVectorName()).toAbsolutePath().toString() + "/hideF0-";
+            resultsMap.put(pathFLRand, Collections.synchronizedList(new ArrayList<>()));
+        }
         if (resultsMap.isEmpty()) {
             throw new Error("Add new path to Weka files to your new HideF0 variant: " + Config.HIDE_F0_TYPE.getName());
         }

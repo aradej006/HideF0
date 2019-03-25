@@ -35,7 +35,6 @@ public class BytesHistogramPrinter {
             });
             System.out.println("\n\n\n");
         });
-
-
     }
+
 }
