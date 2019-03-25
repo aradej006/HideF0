@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -70,8 +69,7 @@ public class FinePithExtractor {
         //print pitchValues
         if (Config.CALCULATE_ALLOW_PLACES) {
             result.stream().map(SampleResult::getPitchCollector).collect(Collectors.toList()).forEach(pitchCollector -> {
-                try {
-                    PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch-" + pitchCollector.getThreshold() + ".txt", "UTF-8");
+                try (PrintWriter printWriter = new PrintWriter(pitchCollector.getPath() + "-pitch-" + pitchCollector.getThreshold() + ".txt", "UTF-8")) {
                     PitchCollectorPrint.print(pitchCollector.getFramePitchValues(), printWriter, false).close();
                 } catch (FileNotFoundException | UnsupportedEncodingException e) {
                     e.printStackTrace();
@@ -131,7 +129,7 @@ public class FinePithExtractor {
 
     private static List<SampleResult> calculate(boolean calculateForWekaFiles) throws InterruptedException {
         List<SampleResult> result = Collections.synchronizedList(new ArrayList<>());
-        for (Integer threshold : Config.THRESHOLDS) {
+        for (float threshold : Config.THRESHOLDS) {
             ExecutorService es = Config.getExecutorService();
             Config.getSamples().forEach(path -> es.execute(() -> {
                 JSpeexEnc encoder = getEncoder(threshold, path, calculateForWekaFiles);
@@ -148,7 +146,7 @@ public class FinePithExtractor {
                             bitsCollector
                     ));
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    log.error(e.getMessage());
                 }
             }));
             es.shutdown();
@@ -156,12 +154,11 @@ public class FinePithExtractor {
             if (!finished) {
                 throw new Error("Some Error");
             }
-            System.gc();
         }
         return result;
     }
 
-    private static JSpeexEnc getEncoder(Integer threshold, String path, boolean calculateForWekaFiles) {
+    private static JSpeexEnc getEncoder(float threshold, String path, boolean calculateForWekaFiles) {
         JSpeexEnc encoder;
         if (calculateForWekaFiles && WekaVectorPrinter.getNoHideF0Set().contains(Config.getSampleNameFromPath(path))) {
             encoder = getSpeexEncoder(new NonHideF0Encoder(threshold, path));

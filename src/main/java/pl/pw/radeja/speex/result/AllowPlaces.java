@@ -8,7 +8,7 @@ import pl.pw.radeja.Config;
 @AllArgsConstructor
 public final class AllowPlaces {
     private String path;
-    private Integer threshold;
+    private float threshold;
     private Integer numberOfAllowPlaces;
 
     public String getSampleName() {

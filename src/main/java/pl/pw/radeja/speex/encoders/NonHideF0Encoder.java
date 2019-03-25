@@ -11,7 +11,7 @@ import java.util.List;
 
 public class NonHideF0Encoder extends HideF0Encoder {
 
-    public NonHideF0Encoder(int threshold, String path) {
+    public NonHideF0Encoder(float threshold, String path) {
         super(new NonPitchChanger(threshold), path, Config.HideF0Type.NON);
     }
 

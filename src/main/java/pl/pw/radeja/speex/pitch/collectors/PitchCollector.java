@@ -9,17 +9,17 @@ import java.util.List;
 
 public class PitchCollector {
     private String path;
-    private Integer threshold;
+    private float threshold;
     private List<PitchValue> framePitchValues;
     private int numberOfFrame = -1;
 
-    public PitchCollector(String path, Integer threshold) {
+    public PitchCollector(String path, float threshold) {
         this.path = path;
         this.threshold = threshold;
         framePitchValues = Collections.synchronizedList(new ArrayList<>());
     }
 
-    public boolean addPitch(List<Integer> pitchValues, boolean changed, Integer calculatedThreshold, Integer calculatedThresholdAfterHideF0) {
+    public boolean addPitch(List<Integer> pitchValues, boolean changed, float calculatedThreshold, float calculatedThresholdAfterHideF0) {
         numberOfFrame++;
         return this.framePitchValues.add(new PitchValue(numberOfFrame, pitchValues, changed, calculatedThreshold, calculatedThresholdAfterHideF0));
     }
@@ -32,7 +32,7 @@ public class PitchCollector {
         return path;
     }
 
-    public Integer getThreshold() {
+    public float getThreshold() {
         return threshold;
     }
 

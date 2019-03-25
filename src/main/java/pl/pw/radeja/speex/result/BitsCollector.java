@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Setter
 public final class BitsCollector {
     private String path;
-    private Integer threshold;
+    private float threshold;
     private List<SpeexBits> bitsToSave = new ArrayList<>();
 
     public boolean addBits(SpeexBitsName name, int data, int nbBits) {

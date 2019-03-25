@@ -8,7 +8,7 @@ import java.util.List;
 @Slf4j
 public class LinearApproximateMiddleChanger extends LinearApproximateChanger {
 
-    public LinearApproximateMiddleChanger(Integer threshold) {
+    public LinearApproximateMiddleChanger(float threshold) {
         super(threshold);
     }
 
@@ -26,13 +26,13 @@ public class LinearApproximateMiddleChanger extends LinearApproximateChanger {
         List<Integer> result = new ArrayList<>();
         result.add(pitches.get(0));
         if (shouldChangeSecond(pitches, threshold)) {
-            result.add(LinearApprox(first, middle, 3, 1));
+            result.add(Math.round(LinearApprox(first, middle, 3, 1)));
         } else {
             result.add(pitches.get(1));
         }
         result.add(pitches.get(2));
         if (shouldChangeFourth(pitches, threshold)) {
-            result.add(LinearApprox(middle, last, 3, 1));
+            result.add(Math.round(LinearApprox(middle, last, 3, 1)));
         } else {
             result.add(pitches.get(3));
         }
@@ -44,22 +44,22 @@ public class LinearApproximateMiddleChanger extends LinearApproximateChanger {
         return result;
     }
 
-    boolean shouldChange(List<Integer> pitches, Integer threshold) {
+    boolean shouldChange(List<Integer> pitches, float threshold) {
         boolean firstTh = shouldChangeSecond(pitches, threshold);
         boolean secondTh = shouldChangeFourth(pitches, threshold);
         return firstTh || secondTh;
     }
 
-    protected boolean shouldChangeSecond(List<Integer> pitches, Integer threshold) {
+    boolean shouldChangeSecond(List<Integer> pitches, float threshold) {
         Integer first = pitches.get(0);
         Integer middle = pitches.get(2);
-        return !(Math.abs(LinearApprox(first, middle, 3, 1) - pitches.get(1)) > threshold);
+        return Math.abs(LinearApprox(first, middle, 3, 1) - pitches.get(1)) <= threshold;
     }
 
-    protected boolean shouldChangeFourth(List<Integer> pitches, Integer threshold) {
+    boolean shouldChangeFourth(List<Integer> pitches, float threshold) {
         Integer middle = pitches.get(2);
         Integer last = pitches.get(4);
-        return !(Math.abs(LinearApprox(middle, last, 3, 1) - pitches.get(3)) > threshold);
+        return Math.abs(LinearApprox(middle, last, 3, 1) - pitches.get(3)) <= threshold;
     }
 
     @Override

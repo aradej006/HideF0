@@ -6,7 +6,7 @@ import java.util.Random;
 public class LinearApproximateRand extends LinearApproximateChanger {
     protected Random r = new Random();
 
-    public LinearApproximateRand(Integer threshold, Long seed) {
+    public LinearApproximateRand(float threshold, Long seed) {
         super(threshold);
         if (seed != null) {
             r = new Random(seed);

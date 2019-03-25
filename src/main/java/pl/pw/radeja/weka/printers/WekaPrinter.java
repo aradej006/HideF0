@@ -31,12 +31,12 @@ public final class WekaPrinter {
 
 
     public static void print(List<PitchCollector> pitchCollectors, int numberOfFrames) {
-        Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
+        Map<Float, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining, hasHideF0SaverTraining);
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest, hasHideF0SaverTest);
     }
 
-    private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector,
+    private static void printTrainTest(Map<Float, List<PitchCollector>> thresholdToPitchCollector,
                                        int numberOfFrames,
                                        String name,
                                        Predicate<PitchCollector> filter,

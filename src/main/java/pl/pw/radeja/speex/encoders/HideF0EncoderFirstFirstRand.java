@@ -5,7 +5,7 @@ import pl.pw.radeja.speex.pitch.changers.LinearApproximateRand;
 
 public class HideF0EncoderFirstFirstRand extends HideF0EncoderFirstFirst {
 
-    public HideF0EncoderFirstFirstRand(int threshold, String path) {
+    public HideF0EncoderFirstFirstRand(float threshold, String path) {
         super(new LinearApproximateRand(threshold, 1L), path);
         this.type = Config.HideF0Type.FIRST_FIRST_RAND;
     }

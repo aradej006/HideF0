@@ -4,10 +4,10 @@ import java.util.*;
 
 public class AllowPlacesPrint {
     public static void print(List<AllowPlaces> result) {
-        Map<String, Map<Integer, AllowPlaces>> resultMap = getResultMap(result);
+        Map<String, Map<Float, AllowPlaces>> resultMap = getResultMap(result);
         ArrayList<String> sampleNames = new ArrayList<>(resultMap.keySet());
         Collections.sort(sampleNames);
-        ArrayList<Integer> thresholds = new ArrayList<>(resultMap.get(sampleNames.get(0)).keySet());
+        ArrayList<Float> thresholds = new ArrayList<>(resultMap.get(sampleNames.get(0)).keySet());
         Collections.sort(thresholds);
         System.out.println("\n\n\n");
         System.out.println("Allow Places");
@@ -21,8 +21,8 @@ public class AllowPlacesPrint {
         System.out.println("\n\n\n");
     }
 
-    private static Map<String, Map<Integer, AllowPlaces>> getResultMap(List<AllowPlaces> result) {
-        Map<String, Map<Integer, AllowPlaces>> resultMap = new HashMap<>();
+    private static Map<String, Map<Float, AllowPlaces>> getResultMap(List<AllowPlaces> result) {
+        Map<String, Map<Float, AllowPlaces>> resultMap = new HashMap<>();
         result.forEach(r -> {
             resultMap.putIfAbsent(r.getSampleName(), new HashMap<>());
             resultMap.get(r.getSampleName()).putIfAbsent(r.getThreshold(), r);

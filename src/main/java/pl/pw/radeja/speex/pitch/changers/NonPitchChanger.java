@@ -4,7 +4,7 @@ import java.util.List;
 
 public class NonPitchChanger extends PitchChanger {
 
-    public NonPitchChanger(Integer threshold) {
+    public NonPitchChanger(float threshold) {
         super(threshold);
     }
 

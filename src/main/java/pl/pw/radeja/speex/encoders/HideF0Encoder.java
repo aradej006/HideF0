@@ -91,8 +91,8 @@ public abstract class HideF0Encoder {
         List<Integer> pitchValues = pitch.stream().map(e -> e.getValue1().getBitsData()).collect(Collectors.toList());
         List<Integer> newPitches = pitchChanger.change(pitchValues, false);
         boolean changed = false;
-        int calculatedThreshold = pitchChanger.calculateThreshold(pitchValues);
-        int calculatedThresholdAfterHideF0 = pitchChanger.calculateThreshold(newPitches);
+        float calculatedThreshold = pitchChanger.calculateThreshold(pitchValues);
+        float calculatedThresholdAfterHideF0 = pitchChanger.calculateThreshold(newPitches);
         if (pitchChanger.shouldChange(pitchValues)) {
             changed = true;
             pitchChanger.change(pitchValues, true);

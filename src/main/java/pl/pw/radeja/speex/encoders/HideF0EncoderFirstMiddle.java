@@ -11,7 +11,7 @@ import java.util.List;
 
 public class HideF0EncoderFirstMiddle extends HideF0Encoder {
 
-    public HideF0EncoderFirstMiddle(int threshold, String path) {
+    public HideF0EncoderFirstMiddle(float threshold, String path) {
         super(new LinearApproximateMiddleChanger(threshold), path, Config.HideF0Type.FIRST_MIDDLE);
     }
 

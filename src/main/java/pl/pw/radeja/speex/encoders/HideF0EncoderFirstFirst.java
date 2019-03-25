@@ -10,7 +10,7 @@ import java.util.*;
 
 public class HideF0EncoderFirstFirst extends HideF0Encoder {
 
-    public HideF0EncoderFirstFirst(int threshold, String path) {
+    public HideF0EncoderFirstFirst(float threshold, String path) {
         super(new LinearApproximateChanger(threshold), path, Config.HideF0Type.FIRST_FIRST);
     }
 

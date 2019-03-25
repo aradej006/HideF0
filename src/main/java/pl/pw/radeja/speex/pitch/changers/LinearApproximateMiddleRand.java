@@ -1,13 +1,12 @@
 package pl.pw.radeja.speex.pitch.changers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 public class LinearApproximateMiddleRand extends LinearApproximateMiddleChanger {
     protected Random r = new Random();
 
-    public LinearApproximateMiddleRand(Integer threshold, Long seed) {
+    public LinearApproximateMiddleRand(float threshold, Long seed) {
         super(threshold);
         if (seed != null) {
             r = new Random(seed);

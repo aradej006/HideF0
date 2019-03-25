@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 public class BytesHistogramPrinter {
 
     public static void printHistograms(List<BitsCollector> bitsCollectors) {
-        Map<Integer, List<BitsCollector>> collect = bitsCollectors.stream()
+        Map<Float, List<BitsCollector>> collect = bitsCollectors.stream()
                 .collect(Collectors.groupingBy(BitsCollector::getThreshold, Collectors.toList()));
-        Map<Integer, Map<String, Map<Integer, Long>>> thresholdToSampleNameToValueToCount = collect.entrySet().stream()
+        Map<Float, Map<String, Map<Integer, Long>>> thresholdToSampleNameToValueToCount = collect.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         v -> v.getValue().stream().collect(Collectors.toMap(BitsCollector::getSampleName, BitsCollectorParser::getHistogramData))));

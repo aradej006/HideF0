@@ -11,6 +11,6 @@ public class PitchValue {
     private int numberOfFrame;
     private List<Integer> pitchValues;
     private boolean changed;
-    private int calculatedThreshold;
-    private int calculatedThresholdAfterHideF0;
+    private float calculatedThreshold;
+    private float calculatedThresholdAfterHideF0;
 }

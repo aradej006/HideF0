@@ -27,12 +27,12 @@ public class WekaVectorPrinter {
     private final static Random rand = new Random(seed);
 
     public static void print(List<PitchCollector> pitchCollectors, int numberOfFrames) {
-        Map<Integer, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
+        Map<Float, List<PitchCollector>> thresholdToPitchCollector = pitchCollectors.stream().collect(Collectors.groupingBy(PitchCollector::getThreshold));
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "train", isTraining, hasHideF0SaverTraining);
         printTrainTest(thresholdToPitchCollector, numberOfFrames, "test", isTest, hasHideF0SaverTest);
     }
 
-    private static void printTrainTest(Map<Integer, List<PitchCollector>> thresholdToPitchCollector,
+    private static void printTrainTest(Map<Float, List<PitchCollector>> thresholdToPitchCollector,
                                        int numberOfFrames,
                                        String name,
                                        Predicate<PitchCollector> filter,
@@ -67,7 +67,7 @@ public class WekaVectorPrinter {
                                                     //print normal;
                                                     String frameDeltas = p.stream()
                                                             .map(framePitchValues -> {
-                                                                List<Integer> delta = new ArrayList<>();
+                                                                List<Float> delta = new ArrayList<>();
                                                                 if (Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST) || Config.HIDE_F0_TYPE.equals(Config.HideF0Type.FIRST_LAST_RAND)) {
                                                                     int first = framePitchValues.getPitchValues().get(0);
                                                                     int last = framePitchValues.getPitchValues().get(framePitchValues.getPitchValues().size() - 1);

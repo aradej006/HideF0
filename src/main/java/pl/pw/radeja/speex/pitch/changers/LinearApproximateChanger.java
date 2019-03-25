@@ -8,7 +8,7 @@ import java.util.List;
 @Slf4j
 public class LinearApproximateChanger extends PitchChanger {
 
-    public LinearApproximateChanger(Integer threshold) {
+    public LinearApproximateChanger(float threshold) {
         super(threshold);
     }
 
@@ -23,7 +23,7 @@ public class LinearApproximateChanger extends PitchChanger {
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
         for (int i = 0; i < 4; i++) {
-            result.add(LinearApprox(first, last, pitches.size(), i));
+            result.add(Math.round(LinearApprox(first, last, pitches.size(), i)));
         }
         if (shouldLog) {
             log.debug("Pitches changed form {} to {}", pitchesToString(pitches), pitchesToString(result));
@@ -35,12 +35,12 @@ public class LinearApproximateChanger extends PitchChanger {
         return shouldChange(pitches, threshold);
     }
 
-    boolean shouldChange(List<Integer> pitches, Integer threshold) {
+    boolean shouldChange(List<Integer> pitches, float threshold) {
         Integer first = pitches.get(0);
         Integer last = pitches.get(pitches.size() - 1);
         for (int i = 0; i < pitches.size(); i++) {
             Integer val = pitches.get(i);
-            Integer approx = LinearApprox(first, last, pitches.size(), i);
+            float approx = LinearApprox(first, last, pitches.size(), i);
             if (Math.abs(approx - val) > threshold) {
                 return false;
             }
