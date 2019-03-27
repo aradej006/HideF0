@@ -21,8 +21,10 @@ import static pl.pw.radeja.Config.*;
 @Slf4j
 public class WekaResultsCollector {
 
-    static String trainExt = "-" + WEKA_FRAMES_PER_RECORD + "-train.arff";
-    static String testExt = "-" + WEKA_FRAMES_PER_RECORD + "-test.arff";
+    static final String trainExt = "-" + WEKA_FRAMES_PER_RECORD + "-train.arff";
+    static final String testExt = "-" + WEKA_FRAMES_PER_RECORD + "-test.arff";
+    static final String trainHistogramExt = "-" + WEKA_BYTES_WINDOW + "-train.arff";
+    static final String testHistogramExt = "-" + WEKA_BYTES_WINDOW + "-test.arff";
 
     public static void main(@NotNull final String[] args) throws InterruptedException {
 
@@ -79,15 +81,20 @@ public class WekaResultsCollector {
                 StopWatch stopWatch = new StopWatch();
                 stopWatch.start();
                 log.info("Running data for:\t" + path);
-                ArffLoader.ArffReader trainLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + trainExt)));
-                ArffLoader.ArffReader testLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + testExt)));
-
+                ArffLoader.ArffReader trainLoader;
+                ArffLoader.ArffReader testLoader;
+                if (PRINT_WEKA_VECTOR_FILES || PRINT_WEKA_FILES) {
+                    trainLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + trainExt)));
+                    testLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + testExt)));
+                } else if (PRINT_WEKA_HISTOGRAM) {
+                    trainLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + trainHistogramExt)));
+                    testLoader = new ArffLoader.ArffReader(new BufferedReader(new FileReader(path + testHistogramExt)));
+                }
                 Instances train = trainLoader.getData();
                 train.setClassIndex(train.numAttributes() - 1);
                 Instances test = testLoader.getData();
                 test.setClassIndex(test.numAttributes() - 1);
                 log.debug("Loaded data for:\t" + path);
-
                 log.debug("Building for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
                 classifier.buildClassifier(train);
                 log.debug("Built for:\t" + path + "\tClassifier:\t" + classifier.getClass().getName());
