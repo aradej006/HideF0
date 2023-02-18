@@ -1,4 +1,4 @@
-Master Thesis
+HideF0 steganography implementation.
 
 Building
 --------
